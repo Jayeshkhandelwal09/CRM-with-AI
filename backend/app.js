@@ -66,7 +66,12 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes (will be added in later phases)
+// Import routes
+const authRoutes = require('./routes/auth');
+
+// API routes
+app.use('/api/auth', authRoutes);
+
 app.get('/api', (req, res) => {
   res.json({
     message: 'AI-Powered CRM API',
