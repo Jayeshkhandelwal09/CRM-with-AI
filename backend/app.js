@@ -56,6 +56,10 @@ app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Request logging middleware
+const requestLogger = require('./middleware/requestLogger');
+app.use(requestLogger);
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
@@ -68,9 +72,15 @@ app.get('/health', (req, res) => {
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const contactRoutes = require('./routes/contacts');
+const dealRoutes = require('./routes/deals');
+const interactionRoutes = require('./routes/interactions');
 
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/contacts', contactRoutes);
+app.use('/api/deals', dealRoutes);
+app.use('/api/interactions', interactionRoutes);
 
 app.get('/api', (req, res) => {
   res.json({
@@ -96,37 +106,8 @@ app.use('*', (req, res) => {
 });
 
 // Global error handler
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  
-  // Default error
-  let error = { ...err };
-  error.message = err.message;
-
-  // Mongoose bad ObjectId
-  if (err.name === 'CastError') {
-    const message = 'Resource not found';
-    error = { message, statusCode: 404 };
-  }
-
-  // Mongoose duplicate key
-  if (err.code === 11000) {
-    const message = 'Duplicate field value entered';
-    error = { message, statusCode: 400 };
-  }
-
-  // Mongoose validation error
-  if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors).map(val => val.message).join(', ');
-    error = { message, statusCode: 400 };
-  }
-
-  res.status(error.statusCode || 500).json({
-    success: false,
-    error: error.message || 'Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-  });
-});
+const errorHandler = require('./middleware/errorHandler');
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 
@@ -134,6 +115,11 @@ const server = app.listen(PORT, () => {
   console.log(`🚀 AI-CRM Backend server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  console.log(`📋 Available endpoints:`);
+  console.log(`   - Auth: http://localhost:${PORT}/api/auth`);
+  console.log(`   - Contacts: http://localhost:${PORT}/api/contacts`);
+  console.log(`   - Deals: http://localhost:${PORT}/api/deals`);
+  console.log(`   - Interactions: http://localhost:${PORT}/api/interactions`);
 });
 
 // Handle unhandled promise rejections
