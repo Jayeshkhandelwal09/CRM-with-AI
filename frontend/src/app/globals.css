@@ -157,6 +157,12 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #F5F5F5;
+  }
+  
+  .glass-input::placeholder {
+    color: #CCCCCC;
+    opacity: 0.7;
   }
   
   .glass-button {
@@ -177,6 +183,12 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(179, 141, 255, 0.3);
+  }
+  
+  /* Select dropdown specific styles */
+  .select-content {
+    z-index: 9999 !important;
+    position: relative;
   }
   
   /* AI-CRM Color Classes */

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -19,12 +20,16 @@ export default function Home() {
             <a href="#contact" className="text-cool-grey hover:text-ice-blue transition-colors">Contact</a>
           </nav>
           <div className="flex space-x-3">
-            <Button variant="outline" className="glass-secondary border-soft-purple text-soft-purple hover:bg-soft-purple hover:text-white">
-              Login
-            </Button>
-            <Button className="glass-button text-white">
-              Get Started
-            </Button>
+            <Link href="/login">
+              <Button variant="outline" className="glass-secondary border-soft-purple text-soft-purple hover:bg-soft-purple hover:text-white">
+                Login
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button className="glass-button text-white">
+                Get Started
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
@@ -43,9 +48,11 @@ export default function Home() {
               customer insights, objection handling, and deal analysis.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="glass-button text-white px-8 py-3">
-                Start Free Trial
-              </Button>
+              <Link href="/register">
+                <Button size="lg" className="glass-button text-white px-8 py-3">
+                  Start Free Trial
+                </Button>
+              </Link>
               <Button size="lg" variant="outline" className="glass-secondary border-soft-purple text-soft-purple hover:bg-soft-purple hover:text-white px-8 py-3">
                 Watch Demo
               </Button>
@@ -54,7 +61,7 @@ export default function Home() {
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div id="features" className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           <Card className="glass-card border-glass">
             <CardHeader>
               <div className="w-12 h-12 bg-ice-blue/20 rounded-lg flex items-center justify-center mb-4">
@@ -151,21 +158,30 @@ export default function Home() {
         </div>
 
         {/* CTA Section */}
-        <div className="glass-card p-12 text-center">
+        <div id="about" className="glass-card p-12 text-center">
           <h2 className="text-3xl font-bold text-near-white mb-4">
             Ready to Transform Your Sales Process?
           </h2>
           <p className="text-cool-grey mb-8 max-w-2xl mx-auto">
             Join thousands of sales professionals who are already using AI to close more deals faster.
           </p>
-          <Button size="lg" className="glass-button text-white px-8 py-3">
-            Start Your Free Trial Today
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/register">
+              <Button size="lg" className="glass-button text-white px-8 py-3">
+                Start Your Free Trial Today
+              </Button>
+            </Link>
+            <Link href="/login">
+              <Button size="lg" variant="outline" className="glass-secondary border-soft-purple text-soft-purple hover:bg-soft-purple hover:text-white px-8 py-3">
+                Already have an account? Sign In
+              </Button>
+            </Link>
+          </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="glass-nav rounded-lg p-6 mt-16">
+      <footer id="contact" className="glass-nav rounded-lg p-6 mt-16">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-cool-grey">
             © 2024 AI-Powered CRM. Built with Next.js, Express.js, and OpenAI.
