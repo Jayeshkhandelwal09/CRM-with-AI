@@ -6,25 +6,21 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
+    'prettier',
   ],
+  plugins: ['prettier'],
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
   rules: {
-    'no-console': 'off', // Allow console.log in backend
+    'prettier/prettier': 'error',
     'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'prefer-const': 'error',
     'no-var': 'error',
     'object-shorthand': 'error',
     'prefer-template': 'error',
-    'template-curly-spacing': 'error',
-    'arrow-spacing': 'error',
-    'comma-dangle': ['error', 'always-multiline'],
-    'quotes': ['error', 'single'],
-    'semi': ['error', 'always'],
-    'indent': ['error', 2],
-    'no-trailing-spaces': 'error',
-    'eol-last': 'error',
   },
 }; 
