@@ -102,7 +102,7 @@ const tokenStorage = {
 };
 
 // API utilities
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 const apiCall = async (endpoint: string, options: RequestInit = {}): Promise<AuthResponse> => {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -144,6 +144,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const isAuthenticated = !!user;
 
+  const refreshAccessToken = async (): Promise<boolean> => {
+    try {
+      const refreshToken = tokenStorage.getRefreshToken();
+      if (!refreshToken) {
+        return false;
+      }
+
+      const response: AuthResponse = await apiCall('/auth/refresh', {
+        method: 'POST',
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (response.success && response.data) {
+        const { tokens } = response.data;
+        
+        // Update tokens (preserve storage type)
+        const isRemembered = !!localStorage.getItem(TOKEN_KEYS.ACCESS_TOKEN);
+        tokenStorage.setTokens(tokens, isRemembered);
+        
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Token refresh error:', error);
+      return false;
+    }
+  };
+
   // Initialize auth state on mount
   useEffect(() => {
     const initializeAuth = async () => {
@@ -161,16 +190,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               // Token invalid, clear storage
               tokenStorage.clearAll();
             }
-          } catch {
+          } catch (error) {
             // Token invalid or expired, try to refresh
             const refreshSuccess = await refreshAccessToken();
-            if (!refreshSuccess) {
+            if (refreshSuccess) {
+              // After successful refresh, try to get user data again
+              try {
+                const response = await apiCall('/auth/me');
+                if (response.success && response.data) {
+                  setUser(response.data.user);
+                } else {
+                  tokenStorage.clearAll();
+                }
+              } catch (retryError) {
+                console.error('Failed to get user after token refresh:', retryError);
+                tokenStorage.clearAll();
+              }
+            } else {
               tokenStorage.clearAll();
             }
           }
         }
-      } catch {
-        console.error('Auth initialization error');
+      } catch (error) {
+        console.error('Auth initialization error:', error);
         tokenStorage.clearAll();
       } finally {
         setIsLoading(false);
@@ -233,35 +275,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
-    }
-  };
-
-  const refreshAccessToken = async (): Promise<boolean> => {
-    try {
-      const refreshToken = tokenStorage.getRefreshToken();
-      if (!refreshToken) {
-        return false;
-      }
-
-      const response: AuthResponse = await apiCall('/auth/refresh', {
-        method: 'POST',
-        body: JSON.stringify({ refreshToken }),
-      });
-
-      if (response.success && response.data) {
-        const { tokens } = response.data;
-        
-        // Update tokens (preserve storage type)
-        const isRemembered = !!localStorage.getItem(TOKEN_KEYS.ACCESS_TOKEN);
-        tokenStorage.setTokens(tokens, isRemembered);
-        
-        return true;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      return false;
     }
   };
 

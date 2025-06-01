@@ -1,10 +1,16 @@
+"use client";
+
 import Link from "next/link";
+import { useTheme } from "@/contexts/ThemeContext";
+import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 
 export default function Home() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Navigation Header */}
-      <nav className="container-responsive py-4 border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <nav className="container-responsive py-4 border-b border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
@@ -12,18 +18,32 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <span className="text-h3 font-semibold">CRM AI</span>
+            <span className="text-h3 font-semibold text-slate-800 dark:text-slate-100">CRM AI</span>
           </div>
-          <Link href="/auth/login" className="btn-ghost">
-            Sign In
-          </Link>
+          <div className="flex items-center gap-4">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {theme === 'light' ? (
+                <MoonIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              ) : (
+                <SunIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+              )}
+            </button>
+            <Link href="/auth/login" className="btn-ghost">
+              Sign In
+            </Link>
+          </div>
         </div>
       </nav>
 
       {/* Hero Section */}
       <section className="container-responsive py-20">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-label font-medium mb-6">
+          <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-full text-label font-medium mb-6">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -36,7 +56,7 @@ export default function Home() {
             with <span className="text-blue-500">AI Intelligence</span>
           </h1>
           
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+          <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto mb-8 leading-relaxed">
             Streamline your customer relationships, accelerate deal closures, and unlock powerful insights 
             with our AI-powered CRM designed for modern sales teams.
           </p>
@@ -51,7 +71,7 @@ export default function Home() {
           </div>
 
           {/* Trust Indicators */}
-          <div className="flex items-center justify-center gap-8 text-slate-500 text-sm">
+          <div className="flex items-center justify-center gap-8 text-slate-500 dark:text-slate-400 text-sm">
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -83,13 +103,13 @@ export default function Home() {
               </svg>
             </div>
             <h3 className="text-h3 mb-3">Smart Contact Management</h3>
-            <p className="text-body mb-4 text-slate-600">
+            <p className="text-body mb-4 text-slate-600 dark:text-slate-300">
               Organize and track up to 2,000 contacts with AI-powered insights, smart categorization, and automated data enrichment.
             </p>
             <div className="flex items-center gap-2">
               <span className="status-info">2,000 contacts</span>
-              <span className="text-slate-400">•</span>
-              <span className="text-caption text-slate-500">AI-enhanced</span>
+              <span className="text-slate-400 dark:text-slate-500">•</span>
+              <span className="text-caption text-slate-500 dark:text-slate-400">AI-enhanced</span>
             </div>
           </div>
 
@@ -101,13 +121,13 @@ export default function Home() {
               </svg>
             </div>
             <h3 className="text-h3 mb-3">Visual Deal Pipeline</h3>
-            <p className="text-body mb-4 text-slate-600">
+            <p className="text-body mb-4 text-slate-600 dark:text-slate-300">
               Track up to 5,000 deals through customizable pipeline stages with intuitive drag-and-drop functionality and forecasting.
             </p>
             <div className="flex items-center gap-2">
               <span className="status-success">5,000 deals</span>
-              <span className="text-slate-400">•</span>
-              <span className="text-caption text-slate-500">Drag & drop</span>
+              <span className="text-slate-400 dark:text-slate-500">•</span>
+              <span className="text-caption text-slate-500 dark:text-slate-400">Drag & drop</span>
             </div>
           </div>
 
@@ -119,13 +139,13 @@ export default function Home() {
               </svg>
             </div>
             <h3 className="text-h3 mb-3">AI-Powered Insights</h3>
-            <p className="text-body mb-4 text-slate-600">
+            <p className="text-body mb-4 text-slate-600 dark:text-slate-300">
               Get intelligent recommendations, deal coaching, customer persona insights, and predictive analytics powered by advanced AI.
             </p>
             <div className="flex items-center gap-2">
               <span className="status-warning">100 AI requests/day</span>
-              <span className="text-slate-400">•</span>
-              <span className="text-caption text-slate-500">Smart insights</span>
+              <span className="text-slate-400 dark:text-slate-500">•</span>
+              <span className="text-caption text-slate-500 dark:text-slate-400">Smart insights</span>
             </div>
           </div>
         </div>
@@ -134,20 +154,20 @@ export default function Home() {
         <div className="glass-card-light text-center">
           <h3 className="text-h3 mb-6">Trusted by Sales Teams Worldwide</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center opacity-60">
-            <div className="text-slate-500 font-semibold">TechCorp</div>
-            <div className="text-slate-500 font-semibold">SalesForce Pro</div>
-            <div className="text-slate-500 font-semibold">Growth Inc</div>
-            <div className="text-slate-500 font-semibold">Revenue Co</div>
+            <div className="text-slate-500 dark:text-slate-400 font-semibold">TechCorp</div>
+            <div className="text-slate-500 dark:text-slate-400 font-semibold">SalesForce Pro</div>
+            <div className="text-slate-500 dark:text-slate-400 font-semibold">Growth Inc</div>
+            <div className="text-slate-500 dark:text-slate-400 font-semibold">Revenue Co</div>
           </div>
         </div>
       </section>
 
       {/* Features Overview */}
-      <section className="bg-white py-20">
+      <section className="bg-white dark:bg-slate-800 py-20">
         <div className="container-responsive">
           <div className="text-center mb-16">
             <h2 className="text-h1 mb-4">Everything You Need to Close More Deals</h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
               Our comprehensive CRM platform combines powerful features with AI intelligence to supercharge your sales process.
             </p>
           </div>
@@ -157,52 +177,52 @@ export default function Home() {
               <h3 className="text-h2 mb-6">Built for Modern Sales Teams</h3>
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-4 h-4 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
                     <h4 className="text-h3 mb-2">Intelligent Lead Scoring</h4>
-                    <p className="text-body text-slate-600">AI analyzes your leads and prioritizes the most promising opportunities automatically.</p>
+                    <p className="text-body text-slate-600 dark:text-slate-300">AI analyzes your leads and prioritizes the most promising opportunities automatically.</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-4 h-4 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
                     <h4 className="text-h3 mb-2">Automated Follow-ups</h4>
-                    <p className="text-body text-slate-600">Never miss a follow-up with smart reminders and automated email sequences.</p>
+                    <p className="text-body text-slate-600 dark:text-slate-300">Never miss a follow-up with smart reminders and automated email sequences.</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-4 h-4 text-purple-500 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
                     <h4 className="text-h3 mb-2">Real-time Analytics</h4>
-                    <p className="text-body text-slate-600">Track performance with detailed reports and actionable insights in real-time.</p>
+                    <p className="text-body text-slate-600 dark:text-slate-300">Track performance with detailed reports and actionable insights in real-time.</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="glass-card">
-              <div className="aspect-video bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg flex items-center justify-center">
+              <div className="aspect-video bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 rounded-lg flex items-center justify-center">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <p className="text-label text-slate-600">Interactive Demo Coming Soon</p>
+                  <p className="text-label text-slate-600 dark:text-slate-300">Interactive Demo Coming Soon</p>
                 </div>
               </div>
             </div>

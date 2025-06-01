@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { toast } from "sonner";
+import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 
 interface FormData {
   email: string;
@@ -156,7 +158,7 @@ export default function LoginPage() {
   // Show loading if auth context is still initializing
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
         <div className="glass-card text-center">
           <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-body">Loading...</p>
@@ -167,24 +169,29 @@ export default function LoginPage() {
 
   const getFieldStatus = (fieldName: keyof FormData) => {
     if (!touched[fieldName]) return '';
-    if (errors[fieldName]) return 'border-red-500 bg-red-50';
-    if (formData[fieldName]) return 'border-green-500 bg-green-50';
+    if (errors[fieldName]) return 'border-red-500 bg-red-50 dark:bg-red-900/20 dark:border-red-400';
+    if (formData[fieldName]) return 'border-green-500 bg-green-50 dark:bg-green-900/20 dark:border-green-400';
     return '';
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <span className="text-h3 font-semibold">CRM AI</span>
-          </Link>
+          <div className="flex items-center justify-between mb-6">
+            <Link href="/" className="inline-flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <span className="text-h3 font-semibold text-slate-800 dark:text-slate-100">CRM AI</span>
+            </Link>
+            
+            {/* Theme Toggle */}
+            <ThemeToggle />
+          </div>
           <h1 className="text-h2 mb-2">Welcome back</h1>
           <p className="text-body">Sign in to your account to continue</p>
         </div>
@@ -193,16 +200,16 @@ export default function LoginPage() {
         <div className="glass-card">
           {/* API Error Display */}
           {apiError && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-caption text-red-600">{apiError}</p>
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
+              <p className="text-caption text-red-600 dark:text-red-400">{apiError}</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="text-label block mb-2">
-                Email Address *
+              <label htmlFor="email" className="block text-label mb-2">
+                Email Address
               </label>
               <input
                 type="email"
@@ -211,20 +218,20 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                  getFieldStatus('email') || 'border-slate-300'
-                }`}
-                placeholder="john@example.com"
+                className={`w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 ${getFieldStatus('email')}`}
+                placeholder="Enter your email"
+                disabled={isLoading}
+                autoComplete="email"
               />
               {touched.email && errors.email && (
-                <p className="text-caption text-red-500 mt-1">{errors.email}</p>
+                <p className="mt-1 text-caption text-red-600 dark:text-red-400">{errors.email}</p>
               )}
             </div>
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="text-label block mb-2">
-                Password *
+              <label htmlFor="password" className="block text-label mb-2">
+                Password
               </label>
               <input
                 type="password"
@@ -233,30 +240,31 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                  getFieldStatus('password') || 'border-slate-300'
-                }`}
-                placeholder="••••••••"
+                className={`w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 ${getFieldStatus('password')}`}
+                placeholder="Enter your password"
+                disabled={isLoading}
+                autoComplete="current-password"
               />
               {touched.password && errors.password && (
-                <p className="text-caption text-red-500 mt-1">{errors.password}</p>
+                <p className="mt-1 text-caption text-red-600 dark:text-red-400">{errors.password}</p>
               )}
             </div>
 
-            {/* Remember Me & Forgot Password */}
+            {/* Remember Me */}
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2">
+              <label className="flex items-center">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 text-blue-500 border-slate-300 rounded focus:ring-blue-500 focus:ring-2"
+                  className="w-4 h-4 text-blue-600 bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded focus:ring-blue-500 focus:ring-2"
+                  disabled={isLoading}
                 />
-                <span className="text-label">Remember me</span>
+                <span className="ml-2 text-label text-slate-600 dark:text-slate-300">Remember me</span>
               </label>
               <Link 
                 href="/auth/forgot-password" 
-                className="text-blue-500 hover:text-blue-600 text-label font-medium"
+                className="text-label text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
               >
                 Forgot password?
               </Link>
@@ -265,13 +273,13 @@ export default function LoginPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading || Object.keys(errors).length > 0}
-              className={`w-full btn-primary ${(isLoading || Object.keys(errors).length > 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isLoading}
+              className="w-full btn-primary py-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Signing In...
+                  Signing in...
                 </div>
               ) : (
                 'Sign In'
@@ -279,48 +287,67 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Register Link */}
+          {/* Demo Login */}
+          <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              disabled={isLoading}
+              className="w-full btn-secondary py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Try Demo Account
+            </button>
+            <p className="mt-2 text-caption text-slate-500 dark:text-slate-400 text-center">
+              Use demo credentials to explore the platform
+            </p>
+          </div>
+
+          {/* Sign Up Link */}
           <div className="mt-6 text-center">
-            <p className="text-body">
-              Don&apos;t have an account?{' '}
-              <Link href="/auth/register" className="text-blue-500 hover:text-blue-600 font-medium">
-                Create one
+            <p className="text-body text-slate-600 dark:text-slate-300">
+              Don't have an account?{' '}
+              <Link 
+                href="/auth/register" 
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+              >
+                Sign up for free
               </Link>
             </p>
           </div>
         </div>
 
-        {/* Demo Account Info */}
-        <div className="glass-card-light mt-6">
-          <div className="flex items-start gap-3">
-            <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-              <svg className="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h4 className="text-label font-medium mb-2">Try Demo Account</h4>
-              <p className="text-caption text-slate-600 mb-3">
-                Experience the platform with pre-configured demo data
-              </p>
-              <div className="space-y-2 mb-3">
-                <p className="text-caption">
-                  <strong>Email:</strong> demo@example.com
-                </p>
-                <p className="text-caption">
-                  <strong>Password:</strong> Demo123!@#
-                </p>
-              </div>
-              <button
-                onClick={handleDemoLogin}
-                className="btn-ghost text-sm w-full"
-              >
-                Fill Demo Credentials
-              </button>
-            </div>
-          </div>
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-caption text-slate-400 dark:text-slate-500">
+            By signing in, you agree to our{' '}
+            <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
+              Privacy Policy
+            </Link>
+          </p>
         </div>
       </div>
     </main>
+  );
+}
+
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  
+  return (
+    <button
+      onClick={toggleTheme}
+      className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+      title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+    >
+      {theme === 'light' ? (
+        <MoonIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+      ) : (
+        <SunIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+      )}
+    </button>
   );
 } 

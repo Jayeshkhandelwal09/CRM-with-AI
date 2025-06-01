@@ -51,29 +51,35 @@
   }
 
   .dark {
-    --background: 30 41 59; /* Slate 800 #1e293b */
-    --foreground: 255 255 255; /* White #ffffff */
-    --card: 59 130 246; /* Blue 500 #3b82f6 */
-    --card-foreground: 255 255 255; /* White #ffffff */
-    --popover: 59 130 246; /* Blue 500 #3b82f6 */
-    --popover-foreground: 255 255 255; /* White #ffffff */
-    --primary: 255 255 255; /* White #ffffff */
-    --primary-foreground: 59 130 246; /* Blue 500 #3b82f6 */
+    --background: 15 23 42; /* Slate 900 #0f172a */
+    --foreground: 248 250 252; /* Slate 50 #f8fafc */
+    --card: 30 41 59; /* Slate 800 #1e293b */
+    --card-foreground: 248 250 252; /* Slate 50 #f8fafc */
+    --popover: 30 41 59; /* Slate 800 #1e293b */
+    --popover-foreground: 248 250 252; /* Slate 50 #f8fafc */
+    --primary: 59 130 246; /* Blue 500 #3b82f6 */
+    --primary-foreground: 239 246 255; /* Blue 50 #eff6ff */
     --secondary: 71 85 105; /* Slate 600 #475569 */
-    --secondary-foreground: 255 255 255; /* White #ffffff */
-    --muted: 148 163 184; /* Slate 400 #94a3b8 */
-    --muted-foreground: 71 85 105; /* Slate 600 #475569 */
-    --accent: 255 255 255; /* White #ffffff */
-    --accent-foreground: 59 130 246; /* Blue 500 #3b82f6 */
+    --secondary-foreground: 248 250 252; /* Slate 50 #f8fafc */
+    --muted: 71 85 105; /* Slate 600 #475569 */
+    --muted-foreground: 148 163 184; /* Slate 400 #94a3b8 */
+    --accent: 59 130 246; /* Blue 500 #3b82f6 */
+    --accent-foreground: 239 246 255; /* Blue 50 #eff6ff */
     --destructive: 239 68 68; /* Red 500 #ef4444 */
-    --border: 226 232 240; /* Slate 200 #e2e8f0 */
-    --input: 255 255 255; /* White #ffffff */
-    --ring: 255 255 255; /* White #ffffff */
+    --border: 71 85 105; /* Slate 600 #475569 */
+    --input: 30 41 59; /* Slate 800 #1e293b */
+    --ring: 59 130 246; /* Blue 500 #3b82f6 */
     --chart-1: 0.488 0.243 264.376;
     --chart-2: 0.696 0.17 162.48;
     --chart-3: 0.769 0.188 70.08;
     --chart-4: 0.627 0.265 303.9;
     --chart-5: 0.645 0.246 16.439;
+
+    /* Dark theme overrides */
+    --text-primary: 248 250 252; /* Slate 50 #f8fafc */
+    --text-secondary: 203 213 225; /* Slate 300 #cbd5e1 */
+    --text-muted: 148 163 184; /* Slate 400 #94a3b8 */
+    --surface: 30 41 59; /* Slate 800 #1e293b */
   }
 
   * {
@@ -102,28 +108,28 @@ body {
 @layer components {
   /* Typography Scale */
   .text-h1 {
-    @apply text-3xl font-bold text-slate-800;
+    @apply text-3xl font-bold text-slate-800 dark:text-slate-100;
   }
 
   .text-h2 {
-    @apply text-2xl font-semibold text-slate-800;
+    @apply text-2xl font-semibold text-slate-800 dark:text-slate-100;
   }
 
   .text-h3 {
-    @apply text-xl font-semibold text-slate-800;
+    @apply text-xl font-semibold text-slate-800 dark:text-slate-100;
   }
 
   .text-body {
-    @apply text-base font-normal text-slate-600;
+    @apply text-base font-normal text-slate-600 dark:text-slate-300;
     font-family: var(--font-roboto);
   }
 
   .text-label {
-    @apply text-sm font-medium text-slate-600;
+    @apply text-sm font-medium text-slate-600 dark:text-slate-300;
   }
 
   .text-caption {
-    @apply text-xs font-normal text-slate-400;
+    @apply text-xs font-normal text-slate-400 dark:text-slate-500;
   }
 
   /* Glassmorphism Components */
@@ -136,9 +142,19 @@ body {
     @apply rounded-xl p-6 transition-all duration-200;
   }
 
+  .dark .glass-card {
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid rgba(71, 85, 105, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
   .glass-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+  }
+
+  .dark .glass-card:hover {
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
   }
 
   .glass-card-light {
@@ -148,6 +164,12 @@ body {
     border: 1px solid rgba(226, 232, 240, 0.8);
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.03);
     @apply rounded-xl p-6;
+  }
+
+  .dark .glass-card-light {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(71, 85, 105, 0.5);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
   }
 
   /* AI Module Cards */
@@ -160,38 +182,42 @@ body {
     box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
   }
 
+  .dark .ai-module-card:hover {
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+  }
+
   /* Button System */
   .btn-primary {
-    @apply bg-blue-500 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+    @apply bg-blue-500 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900;
   }
 
   .btn-secondary {
-    @apply bg-transparent text-blue-500 border border-blue-500 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-blue-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+    @apply bg-transparent text-blue-500 border border-blue-500 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-blue-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900;
   }
 
   .btn-ghost {
-    @apply bg-transparent text-slate-600 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-2;
+    @apply bg-transparent text-slate-600 dark:text-slate-300 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 dark:focus:ring-slate-600 focus:ring-offset-2 dark:focus:ring-offset-slate-900;
   }
 
   .btn-danger {
-    @apply bg-red-500 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+    @apply bg-red-500 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900;
   }
 
   /* Status Indicators */
   .status-success {
-    @apply bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium;
+    @apply bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 px-2 py-1 rounded-full text-xs font-medium;
   }
 
   .status-warning {
-    @apply bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium;
+    @apply bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-300 px-2 py-1 rounded-full text-xs font-medium;
   }
 
   .status-error {
-    @apply bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium;
+    @apply bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 px-2 py-1 rounded-full text-xs font-medium;
   }
 
   .status-info {
-    @apply bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium;
+    @apply bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full text-xs font-medium;
   }
 
   /* Responsive Utilities */
@@ -200,37 +226,40 @@ body {
   }
 
   /* Custom Scrollbar */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(148 163 184) transparent;
+  }
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgb(var(--background));
+    background: transparent;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgb(var(--border));
+    background-color: rgb(148 163 184);
     border-radius: 3px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgb(var(--text-muted));
+    background-color: rgb(100 116 139);
   }
 
-  /* Focus Styles */
+  /* Focus Ring */
   .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900;
   }
-}
 
-@layer utilities {
   /* Animation Classes */
   .fade-in {
     animation: fadeIn 0.3s ease-in-out;
   }
 
   .slide-up {
-    animation: slideUp 0.3s ease-in-out;
+    animation: slideUp 0.3s ease-out;
   }
 
   @keyframes fadeIn {
@@ -244,12 +273,12 @@ body {
 
   @keyframes slideUp {
     from {
-      opacity: 0;
       transform: translateY(10px);
+      opacity: 0;
     }
     to {
-      opacity: 1;
       transform: translateY(0);
+      opacity: 1;
     }
   }
 }

@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Roboto } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { PageErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { Toaster } from "sonner";
 
 // Font configurations as per frontend design specs
@@ -39,10 +41,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${roboto.variable}`}>
-      <body className={`${inter.className} antialiased bg-slate-50 text-slate-800`}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+      <body className={`${inter.className} antialiased bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100`}>
+        <PageErrorBoundary>
+          <ThemeProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </ThemeProvider>
+        </PageErrorBoundary>
         <Toaster 
           position="top-right"
           richColors
