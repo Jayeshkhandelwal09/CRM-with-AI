@@ -15,6 +15,7 @@ const logger = require('./utils/logger');
 const authRoutes = require('./routes/auth');
 const contactRoutes = require('./routes/contacts');
 const csvRoutes = require('./routes/csv');
+const dealRoutes = require('./routes/deals');
 
 const app = express();
 
@@ -89,6 +90,7 @@ app.get('/api', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/csv', csvRoutes);
+app.use('/api/deals', dealRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

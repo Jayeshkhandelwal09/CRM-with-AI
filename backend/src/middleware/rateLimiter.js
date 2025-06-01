@@ -50,9 +50,22 @@ const aiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Deal endpoints rate limiter
+const dealLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 deal creation requests per 15 minutes
+  message: {
+    success: false,
+    error: 'Too many deal creation requests, please try again later.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 module.exports = {
   apiLimiter,
   authLimiter,
   contactLimiter,
   aiLimiter,
+  dealLimiter,
 }; 
