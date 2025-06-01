@@ -503,6 +503,21 @@ const getPipelineOverview = async (req, res) => {
     // Get pipeline summary using the model's static method
     const pipelineSummary = await Deal.getPipelineSummary(userId);
 
+    // Define all possible stages to ensure they're all represented
+    const allStages = ['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost'];
+    
+    // Map the pipeline summary to the expected format and ensure all stages are included
+    const mappedPipelineStages = allStages.map(stageName => {
+      const stageData = pipelineSummary.find(stage => stage._id === stageName);
+      return {
+        stage: stageName,
+        count: stageData?.count || 0,
+        value: stageData?.totalValue || 0,
+        weightedValue: stageData?.totalWeightedValue || 0,
+        avgProbability: stageData?.avgProbability || 0
+      };
+    });
+    
     // Get additional metrics
     const totalDeals = await Deal.countDocuments({ owner: userId });
     const activeDeals = await Deal.countDocuments({ owner: userId, isActive: true });
@@ -525,10 +540,14 @@ const getPipelineOverview = async (req, res) => {
       { $group: { _id: null, total: { $sum: '$weightedValue' } } }
     ]);
 
+    // Calculate average deal value
+    const averageDealValue = totalDeals > 0 ? Math.round((totalValue[0]?.total || 0) / totalDeals) : 0;
+
     logger.info(`Retrieved pipeline overview for user ${userId}`, {
       userId,
       totalDeals,
-      activeDeals
+      activeDeals,
+      pipelineStages: mappedPipelineStages.length
     });
 
     res.status(200).json({
@@ -542,9 +561,10 @@ const getPipelineOverview = async (req, res) => {
           overdueDeals,
           totalValue: totalValue[0]?.total || 0,
           totalWeightedValue: totalWeightedValue[0]?.total || 0,
-          winRate: closedDeals > 0 ? Math.round((wonDeals / closedDeals) * 100) : 0
+          winRate: closedDeals > 0 ? Math.round((wonDeals / closedDeals) * 100) : 0,
+          averageDealValue
         },
-        pipelineStages: pipelineSummary
+        pipelineStages: mappedPipelineStages
       }
     });
 

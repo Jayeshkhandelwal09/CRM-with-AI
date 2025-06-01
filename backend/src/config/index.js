@@ -1,3 +1,6 @@
+// Load environment variables from .env file
+require('dotenv').config();
+
 const config = {
   // Server Configuration
   port: process.env.PORT || 5000,

@@ -335,8 +335,8 @@ class ContactExport {
       'description'
     ];
 
-    const headers = fields.map(field => this.getFieldDisplayName(field));
-    const csvContent = headers.join(',') + '\n';
+    // Use actual field names instead of display names for import template
+    const csvContent = fields.join(',') + '\n';
 
     return {
       success: true,

@@ -116,13 +116,7 @@ const dealSchema = new mongoose.Schema({
   // Important Dates
   expectedCloseDate: {
     type: Date,
-    required: [true, 'Expected close date is required'],
-    validate: {
-      validator: function(v) {
-        return v >= new Date();
-      },
-      message: 'Expected close date cannot be in the past'
-    }
+    required: [true, 'Expected close date is required']
   },
   actualCloseDate: {
     type: Date,
@@ -566,7 +560,14 @@ dealSchema.statics.findOverdue = function(ownerId = null) {
 
 // Static method to get pipeline summary
 dealSchema.statics.getPipelineSummary = async function(ownerId = null) {
-  const matchStage = ownerId ? { owner: ownerId } : {};
+  const matchStage = {};
+  
+  if (ownerId) {
+    // Convert string to ObjectId if needed
+    matchStage.owner = mongoose.Types.ObjectId.isValid(ownerId) 
+      ? new mongoose.Types.ObjectId(ownerId) 
+      : ownerId;
+  }
   
   const pipeline = await this.aggregate([
     { $match: matchStage },
