@@ -1,6 +1,7 @@
 // Base Types
 export interface BaseEntity {
   _id: string
+  id?: string
   createdAt: string
   updatedAt: string
 }
@@ -40,16 +41,63 @@ export interface Contact extends BaseEntity {
 // Deal Types
 export interface Deal extends BaseEntity {
   title: string
+  description?: string
   value: number
+  currency?: string
   stage: 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost'
+  pipeline?: string
   probability: number
   expectedCloseDate?: string
   actualCloseDate?: string
   closeReason?: string
+  lostReason?: string
   notes?: string
   contactId: string
   userId: string
   contact?: Contact
+  company?: string
+  source?: string
+  dealType?: string
+  priority?: 'low' | 'medium' | 'high' | 'urgent'
+  isActive?: boolean
+  isClosed?: boolean
+  isWon?: boolean
+  tags?: string[]
+  ageInDays?: number
+  daysUntilClose?: number
+  statusDisplay?: string
+  stageDisplay?: string
+}
+
+// Pipeline Types
+export interface PipelineOverview {
+  summary: {
+    totalDeals: number
+    activeDeals: number
+    closedDeals: number
+    wonDeals: number
+    lostDeals?: number
+    overdueDeals: number
+    totalValue: number
+    totalWeightedValue: number
+    winRate: number
+    averageDealValue?: number
+    conversionRate?: number
+  }
+  pipelineStages: Array<{
+    stage: string
+    stageDisplay?: string
+    count: number
+    value: number
+    weightedValue: number
+    avgProbability?: number
+  }>
+  forecastData?: Array<{
+    category: string
+    count: number
+    totalValue: number
+    totalWeightedValue: number
+  }>
 }
 
 // Interaction Types

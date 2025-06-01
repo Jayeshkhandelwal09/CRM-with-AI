@@ -16,7 +16,7 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute>
       <DashboardLayout>
-        <DashboardContent />
+      <DashboardContent />
       </DashboardLayout>
     </ProtectedRoute>
   );
@@ -75,7 +75,7 @@ function DashboardContent() {
     <div className="space-y-8">
       {/* Welcome Header */}
       <div className="glass-card">
-        <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
           <div>
             <h1 className="text-h1 mb-2">
               Welcome back, {user?.firstName || 'User'}! 👋
@@ -83,10 +83,10 @@ function DashboardContent() {
             <p className="text-body text-slate-600 dark:text-slate-300">
               Here's what's happening with your CRM today.
             </p>
-          </div>
-          
+            </div>
+            
           <div className="hidden lg:flex items-center gap-4">
-            <div className="text-right">
+              <div className="text-right">
               <p className="text-caption text-slate-500 dark:text-slate-400">Today's Date</p>
               <p className="text-label font-medium text-slate-800 dark:text-slate-100">
                 {new Date().toLocaleDateString('en-US', {
@@ -165,8 +165,8 @@ function DashboardContent() {
                 Coming Soon
               </span>
             </div>
-          </div>
-        </div>
+            </div>
+            </div>
 
         {/* Support Card */}
         <div className="glass-card-light">

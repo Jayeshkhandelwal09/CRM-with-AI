@@ -228,7 +228,7 @@ export default function RegisterPage() {
   const getPasswordStrength = () => {
     const password = formData.password;
     if (!password) return { strength: 0, label: '', color: '' };
-
+    
     let score = 0;
     const checks = {
       length: password.length >= 8,
@@ -237,9 +237,9 @@ export default function RegisterPage() {
       number: /\d/.test(password),
       special: /[@$!%*?&]/.test(password)
     };
-
+    
     score = Object.values(checks).filter(Boolean).length;
-
+    
     if (score <= 2) return { strength: score, label: 'Weak', color: 'text-red-500 dark:text-red-400' };
     if (score <= 3) return { strength: score, label: 'Fair', color: 'text-orange-500 dark:text-orange-400' };
     if (score <= 4) return { strength: score, label: 'Good', color: 'text-blue-500 dark:text-blue-400' };
@@ -255,13 +255,13 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-between mb-6">
             <Link href="/" className="inline-flex items-center gap-2">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
+            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
               <span className="text-h3 font-semibold text-slate-800 dark:text-slate-100">CRM AI</span>
-            </Link>
+          </Link>
             
             {/* Theme Toggle */}
             <ThemeToggle />
@@ -375,15 +375,15 @@ export default function RegisterPage() {
                     </span>
                   </div>
                   <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        passwordStrength.strength <= 2 ? 'bg-red-500' :
+                      <div 
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          passwordStrength.strength <= 2 ? 'bg-red-500' :
                         passwordStrength.strength <= 3 ? 'bg-orange-500' :
-                        passwordStrength.strength <= 4 ? 'bg-blue-500' : 'bg-green-500'
-                      }`}
-                      style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
-                    ></div>
-                  </div>
+                          passwordStrength.strength <= 4 ? 'bg-blue-500' : 'bg-green-500'
+                        }`}
+                        style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
+                      ></div>
+                    </div>
                 </div>
               )}
               
@@ -448,7 +448,7 @@ export default function RegisterPage() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-caption text-slate-400 dark:text-slate-500">
-            By creating an account, you agree to our{' '}
+          By creating an account, you agree to our{' '}
             <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
               Terms of Service
             </Link>{' '}
@@ -456,7 +456,7 @@ export default function RegisterPage() {
             <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
               Privacy Policy
             </Link>
-          </p>
+        </p>
         </div>
       </div>
     </main>

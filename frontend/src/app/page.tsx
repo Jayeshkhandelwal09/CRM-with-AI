@@ -33,9 +33,9 @@ export default function Home() {
                 <SunIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
               )}
             </button>
-            <Link href="/auth/login" className="btn-ghost">
-              Sign In
-            </Link>
+          <Link href="/auth/login" className="btn-ghost">
+            Sign In
+          </Link>
           </div>
         </div>
       </nav>
