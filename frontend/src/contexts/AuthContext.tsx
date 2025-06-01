@@ -2,65 +2,19 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import Cookies from 'js-cookie';
-import { authAPI } from '@/lib/api';
-
-// Types
-interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: 'SDR' | 'AE' | 'Manager' | 'Admin';
-  status: 'active' | 'inactive' | 'pending';
-  company: string;
-  department?: string;
-  aiRequestsUsed: number;
-  aiRequestsLimit: number;
-  avatar?: string;
-  timezone: string;
-  preferences: {
-    notifications: {
-      email: boolean;
-      push: boolean;
-      dealUpdates: boolean;
-      aiInsights: boolean;
-    };
-    theme: 'light' | 'dark' | 'auto';
-    language: string;
-  };
-  emailVerified: boolean;
-  onboardingCompleted: boolean;
-  onboardingSteps: {
-    profileSetup: boolean;
-    teamInvite: boolean;
-    firstDeal: boolean;
-    aiTutorial: boolean;
-  };
-  lastLogin?: string;
-  createdAt: string;
-  updatedAt: string;
-  fullName: string;
-}
+import { apiService } from '@/services/api';
+import { User, RegisterFormData } from '@/types';
+import { getErrorMessage } from '@/lib/utils';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: RegisterData) => Promise<void>;
+  register: (userData: Omit<RegisterFormData, 'confirmPassword'>) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (profileData: Partial<User>) => Promise<void>;
   refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
-}
-
-interface RegisterData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  company: string;
-  role?: string;
-  department?: string;
 }
 
 // Create context
@@ -100,9 +54,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string): Promise<void> => {
     try {
       setLoading(true);
-      const response = await authAPI.login({ email, password });
+      const response = await apiService.login({ email, password });
       
-      if (response.success) {
+      if (response.success && response.data) {
         const { user: userData, tokens } = response.data;
         
         // Store tokens in cookies
@@ -116,19 +70,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Login failed');
+      throw new Error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
   };
 
   // Register function
-  const register = async (userData: RegisterData): Promise<void> => {
+  const register = async (userData: Omit<RegisterFormData, 'confirmPassword'>): Promise<void> => {
     try {
       setLoading(true);
-      const response = await authAPI.register(userData);
+      const response = await apiService.register(userData);
       
-      if (response.success) {
+      if (response.success && response.data) {
         const { user: newUser, tokens } = response.data;
         
         // Store tokens in cookies
@@ -142,7 +96,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } catch (error: any) {
       console.error('Registration error:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Registration failed');
+      throw new Error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -155,7 +109,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       // Call logout API to invalidate tokens
       if (refreshToken) {
-        await authAPI.logout(refreshToken);
+        await apiService.logout(refreshToken);
       }
     } catch (error) {
       console.error('Logout API error:', error);
@@ -171,32 +125,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Update profile function
   const updateProfile = async (profileData: Partial<User>): Promise<void> => {
     try {
-      const response = await authAPI.updateProfile(profileData);
+      const response = await apiService.updateProfile(profileData);
       
-      if (response.success) {
+      if (response.success && response.data) {
         setUser(response.data.user);
       } else {
         throw new Error(response.error || 'Profile update failed');
       }
     } catch (error: any) {
       console.error('Profile update error:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Profile update failed');
+      throw new Error(getErrorMessage(error));
     }
   };
 
   // Refresh user data
   const refreshUser = async (): Promise<void> => {
     try {
-      const response = await authAPI.getProfile();
+      const response = await apiService.getProfile();
       
-      if (response.success) {
+      if (response.success && response.data) {
         setUser(response.data.user);
       } else {
         throw new Error(response.error || 'Failed to fetch user profile');
       }
     } catch (error: any) {
       console.error('Refresh user error:', error);
-      throw new Error(error.response?.data?.error || error.message || 'Failed to fetch user profile');
+      throw new Error(getErrorMessage(error));
     }
   };
 
@@ -211,11 +165,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     isAuthenticated,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 // Hook to use auth context
@@ -236,7 +186,7 @@ export const withAuth = <P extends object>(
 
     if (loading) {
       return (
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-charcoal-glass to-slate-900">
           <div className="glass-card p-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ice-blue mx-auto"></div>
             <p className="text-cool-grey mt-4">Loading...</p>
@@ -246,7 +196,6 @@ export const withAuth = <P extends object>(
     }
 
     if (!isAuthenticated) {
-      // Redirect to login page
       if (typeof window !== 'undefined') {
         window.location.href = '/login';
       }
@@ -257,7 +206,7 @@ export const withAuth = <P extends object>(
   };
 
   AuthenticatedComponent.displayName = `withAuth(${WrappedComponent.displayName || WrappedComponent.name})`;
-  
+
   return AuthenticatedComponent;
 };
 

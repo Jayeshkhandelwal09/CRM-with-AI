@@ -2,43 +2,25 @@
 
 import React from 'react';
 import { useAuth, withAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
+import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 function DashboardPage() {
-  const { user, logout } = useAuth();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      window.location.href = '/login';
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
+  const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-charcoal-glass to-slate-900 p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-near-white">Welcome to AI-CRM Dashboard</h1>
-            <p className="text-cool-grey mt-2">
-              Hello, {user?.firstName} {user?.lastName}! Ready to supercharge your sales with AI?
-            </p>
-          </div>
-          <Button
-            onClick={handleLogout}
-            variant="outline"
-            className="glass-secondary text-soft-purple border-soft-purple hover:text-white"
-          >
-            Logout
-          </Button>
+    <MainLayout>
+      <div className="space-y-6">
+        {/* Welcome Section */}
+        <div>
+          <h1 className="text-3xl font-bold text-near-white">Welcome back, {user?.firstName}!</h1>
+          <p className="text-cool-grey mt-2">
+            Ready to supercharge your sales with AI? Here's your overview.
+          </p>
         </div>
 
-        {/* User Info Card */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {/* User Info Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card className="glass-card border-glass">
             <CardHeader>
               <CardTitle className="text-ice-blue">Profile Information</CardTitle>
@@ -141,79 +123,120 @@ function DashboardPage() {
         </div>
 
         {/* AI Modules Preview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="glass-card border-glass hover:border-ice-blue transition-colors cursor-pointer">
-            <CardHeader>
-              <CardTitle className="text-ice-blue flex items-center space-x-2">
-                <span>🎯</span>
-                <span>Deal Coach AI</span>
-              </CardTitle>
-              <CardDescription className="text-cool-grey">
-                Get AI-powered insights to close deals faster
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-cool-grey">
-                Coming soon in Phase 3...
-              </p>
-            </CardContent>
-          </Card>
+        <div>
+          <h2 className="text-2xl font-bold text-near-white mb-4">AI-Powered Features</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="glass-card border-glass hover:border-ice-blue transition-colors cursor-pointer">
+              <CardHeader>
+                <CardTitle className="text-ice-blue flex items-center space-x-2">
+                  <span>🎯</span>
+                  <span>Deal Coach AI</span>
+                </CardTitle>
+                <CardDescription className="text-cool-grey">
+                  Get AI-powered insights to close deals faster
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-cool-grey">
+                  Coming soon in Phase 4...
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card className="glass-card border-glass hover:border-ice-blue transition-colors cursor-pointer">
-            <CardHeader>
-              <CardTitle className="text-ice-blue flex items-center space-x-2">
-                <span>👤</span>
-                <span>Persona Builder</span>
-              </CardTitle>
-              <CardDescription className="text-cool-grey">
-                Build detailed customer personas with AI
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-cool-grey">
-                Coming soon in Phase 4...
-              </p>
-            </CardContent>
-          </Card>
+            <Card className="glass-card border-glass hover:border-ice-blue transition-colors cursor-pointer">
+              <CardHeader>
+                <CardTitle className="text-ice-blue flex items-center space-x-2">
+                  <span>👤</span>
+                  <span>Persona Builder</span>
+                </CardTitle>
+                <CardDescription className="text-cool-grey">
+                  Build detailed customer personas with AI
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-cool-grey">
+                  Coming soon in Phase 4...
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card className="glass-card border-glass hover:border-ice-blue transition-colors cursor-pointer">
-            <CardHeader>
-              <CardTitle className="text-ice-blue flex items-center space-x-2">
-                <span>🛡️</span>
-                <span>Objection Handler</span>
-              </CardTitle>
-              <CardDescription className="text-cool-grey">
-                Handle objections with AI-generated responses
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-cool-grey">
-                Coming soon in Phase 5...
-              </p>
-            </CardContent>
-          </Card>
+            <Card className="glass-card border-glass hover:border-ice-blue transition-colors cursor-pointer">
+              <CardHeader>
+                <CardTitle className="text-ice-blue flex items-center space-x-2">
+                  <span>🛡️</span>
+                  <span>Objection Handler</span>
+                </CardTitle>
+                <CardDescription className="text-cool-grey">
+                  Handle objections with AI-generated responses
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-cool-grey">
+                  Coming soon in Phase 4...
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card className="glass-card border-glass hover:border-ice-blue transition-colors cursor-pointer">
-            <CardHeader>
-              <CardTitle className="text-ice-blue flex items-center space-x-2">
-                <span>📊</span>
-                <span>Win/Loss Explainer</span>
-              </CardTitle>
-              <CardDescription className="text-cool-grey">
-                Understand why deals are won or lost
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-cool-grey">
-                Coming soon in Phase 6...
-              </p>
-            </CardContent>
-          </Card>
+            <Card className="glass-card border-glass hover:border-ice-blue transition-colors cursor-pointer">
+              <CardHeader>
+                <CardTitle className="text-ice-blue flex items-center space-x-2">
+                  <span>📊</span>
+                  <span>Win/Loss Explainer</span>
+                </CardTitle>
+                <CardDescription className="text-cool-grey">
+                  Understand why deals succeed or fail
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-cool-grey">
+                  Coming soon in Phase 4...
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div>
+          <h2 className="text-2xl font-bold text-near-white mb-4">Quick Stats</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card className="glass-card border-glass">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-ice-blue">0</p>
+                  <p className="text-cool-grey text-sm">Total Contacts</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="glass-card border-glass">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-ice-blue">0</p>
+                  <p className="text-cool-grey text-sm">Active Deals</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="glass-card border-glass">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-ice-blue">$0</p>
+                  <p className="text-cool-grey text-sm">Pipeline Value</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="glass-card border-glass">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-ice-blue">0%</p>
+                  <p className="text-cool-grey text-sm">Win Rate</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 }
 
-// Export the protected component
 export default withAuth(DashboardPage); 

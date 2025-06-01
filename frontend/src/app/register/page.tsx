@@ -5,40 +5,15 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
-
-// Validation schema
-const registerSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters').max(50, 'First name cannot exceed 50 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters').max(50, 'Last name cannot exceed 50 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
-  confirmPassword: z.string(),
-  company: z.string().min(2, 'Company name must be at least 2 characters').max(100, 'Company name cannot exceed 100 characters'),
-  role: z.enum(['SDR', 'AE', 'Manager', 'Admin']),
-  department: z.string().max(50, 'Department cannot exceed 50 characters').optional().or(z.literal('')),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-type RegisterFormData = z.infer<typeof registerSchema>;
-
-const roleOptions = [
-  { value: 'SDR', label: 'SDR (Sales Development Rep)' },
-  { value: 'AE', label: 'AE (Account Executive)' },
-  { value: 'Manager', label: 'Sales Manager' },
-  { value: 'Admin', label: 'Administrator' },
-];
+import { registerSchema, RegisterFormData } from '@/lib/validations';
+import { USER_ROLES } from '@/types';
+import { getErrorMessage } from '@/lib/utils';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -86,7 +61,7 @@ export default function RegisterPage() {
       // Redirect to dashboard on successful registration
       router.push('/dashboard');
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Registration failed. Please try again.';
+      const errorMessage = getErrorMessage(err);
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -203,7 +178,7 @@ export default function RegisterPage() {
                 )}
               </div>
 
-              {/* Role and Department */}
+              {/* Role and Department Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="role" className="text-cool-grey">
@@ -217,10 +192,10 @@ export default function RegisterPage() {
                         <SelectTrigger className="glass-input">
                           <SelectValue placeholder="Select your role" />
                         </SelectTrigger>
-                        <SelectContent>
-                          {roleOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
+                        <SelectContent className="select-content">
+                          {USER_ROLES.map((role) => (
+                            <SelectItem key={role.value} value={role.value}>
+                              {role.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -233,12 +208,12 @@ export default function RegisterPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="department" className="text-cool-grey">
-                    Department <span className="text-xs text-cool-grey/70">(Optional)</span>
+                    Department (Optional)
                   </Label>
                   <Input
                     id="department"
                     type="text"
-                    placeholder="Sales"
+                    placeholder="Sales, Marketing, etc."
                     className="glass-input"
                     {...register('department')}
                   />
@@ -249,7 +224,7 @@ export default function RegisterPage() {
               </div>
 
               {/* Password Fields */}
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-cool-grey">
                     Password
@@ -264,31 +239,29 @@ export default function RegisterPage() {
                   {errors.password && (
                     <p className="text-red-400 text-sm">{errors.password.message}</p>
                   )}
-                  {/* Password Requirements */}
+                  {/* Password Strength Indicator */}
                   {password && (
-                    <div className="glass-card p-3 mt-2 border-glass">
-                      <p className="text-xs text-cool-grey mb-2 font-medium">Password Requirements:</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
-                        <p className={password.length >= 8 ? 'text-green-400' : 'text-red-400'}>
-                          ✓ At least 8 characters
-                        </p>
-                        <p className={/[A-Z]/.test(password) ? 'text-green-400' : 'text-red-400'}>
-                          ✓ One uppercase letter
-                        </p>
-                        <p className={/[a-z]/.test(password) ? 'text-green-400' : 'text-red-400'}>
-                          ✓ One lowercase letter
-                        </p>
-                        <p className={/\d/.test(password) ? 'text-green-400' : 'text-red-400'}>
-                          ✓ One number
-                        </p>
-                        <p className={/[@$!%*?&]/.test(password) ? 'text-green-400' : 'text-red-400'}>
-                          ✓ One special character
-                        </p>
+                    <div className="space-y-1">
+                      <div className="text-xs text-cool-grey">Password strength:</div>
+                      <div className="flex space-x-1">
+                        {[1, 2, 3, 4].map((level) => (
+                          <div
+                            key={level}
+                            className={`h-1 flex-1 rounded ${
+                              getPasswordStrength(password) >= level
+                                ? level <= 2
+                                  ? 'bg-red-500'
+                                  : level === 3
+                                  ? 'bg-yellow-500'
+                                  : 'bg-green-500'
+                                : 'bg-gray-600'
+                            }`}
+                          />
+                        ))}
                       </div>
                     </div>
                   )}
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword" className="text-cool-grey">
                     Confirm Password
@@ -309,7 +282,7 @@ export default function RegisterPage() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full glass-button text-white py-3"
+                className="w-full glass-button text-white"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -340,4 +313,15 @@ export default function RegisterPage() {
       </div>
     </div>
   );
+}
+
+// Helper function for password strength
+function getPasswordStrength(password: string): number {
+  let strength = 0;
+  if (password.length >= 8) strength++;
+  if (/[a-z]/.test(password)) strength++;
+  if (/[A-Z]/.test(password)) strength++;
+  if (/\d/.test(password)) strength++;
+  if (/[@$!%*?&]/.test(password)) strength++;
+  return Math.min(strength, 4);
 } 

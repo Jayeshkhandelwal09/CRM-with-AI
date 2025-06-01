@@ -5,20 +5,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-
-// Validation schema
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import { loginSchema, LoginFormData } from '@/lib/validations';
+import { getErrorMessage } from '@/lib/utils';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -51,7 +44,7 @@ export default function LoginPage() {
       // Redirect to dashboard on successful login
       router.push('/dashboard');
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Login failed. Please try again.';
+      const errorMessage = getErrorMessage(err);
       setError(errorMessage);
     } finally {
       setIsLoading(false);
