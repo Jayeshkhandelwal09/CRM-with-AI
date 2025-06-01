@@ -1,328 +1,252 @@
-// Base types
+// Base Types
 export interface BaseEntity {
-  _id: string;
-  createdAt: string;
-  updatedAt: string;
+  _id: string
+  createdAt: string
+  updatedAt: string
 }
 
-// User types
+// User Types
 export interface User extends BaseEntity {
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: UserRole;
-  status: UserStatus;
-  company: string;
-  department?: string;
-  aiRequestsUsed: number;
-  aiRequestsLimit: number;
-  avatar?: string;
-  timezone: string;
-  preferences: UserPreferences;
-  emailVerified: boolean;
-  onboardingCompleted: boolean;
-  onboardingSteps: OnboardingSteps;
-  lastLogin?: string;
-  fullName: string;
+  email: string
+  firstName: string
+  lastName: string
+  role: 'admin' | 'manager' | 'sales_rep' | 'user'
+  avatar?: string
+  preferences?: UserPreferences
 }
-
-export type UserRole = 'SDR' | 'AE' | 'Manager' | 'Admin';
-export type UserStatus = 'active' | 'inactive' | 'pending';
 
 export interface UserPreferences {
-  notifications: {
-    email: boolean;
-    push: boolean;
-    dealUpdates: boolean;
-    aiInsights: boolean;
-  };
-  theme: 'light' | 'dark' | 'auto';
-  language: string;
+  theme: 'light' | 'dark'
+  notifications: boolean
+  language: string
+  timezone: string
 }
 
-export interface OnboardingSteps {
-  profileSetup: boolean;
-  teamInvite: boolean;
-  firstDeal: boolean;
-  aiTutorial: boolean;
-}
-
-// Contact types
+// Contact Types
 export interface Contact extends BaseEntity {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  company: string;
-  position?: string;
-  status: ContactStatus;
-  source: ContactSource;
-  tags: string[];
-  notes?: string;
-  socialProfiles?: SocialProfiles;
-  customFields?: Record<string, any>;
-  lastContactDate?: string;
-  nextFollowUpDate?: string;
-  leadScore?: number;
-  isDeleted: boolean;
-  fullName: string;
-  userId: string;
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  company?: string
+  role?: string
+  type: 'lead' | 'prospect' | 'customer' | 'partner'
+  tags?: string[]
+  notes?: string
+  userId: string
+  lastInteraction?: string
 }
 
-export type ContactStatus = 'new' | 'qualified' | 'contacted' | 'nurturing' | 'converted' | 'lost';
-export type ContactSource = 'website' | 'referral' | 'social' | 'email' | 'phone' | 'event' | 'other';
-
-export interface SocialProfiles {
-  linkedin?: string;
-  twitter?: string;
-  facebook?: string;
-  instagram?: string;
-}
-
-// Deal types
+// Deal Types
 export interface Deal extends BaseEntity {
-  title: string;
-  description?: string;
-  value: number;
-  currency: string;
-  stage: DealStage;
-  probability: number;
-  expectedCloseDate?: string;
-  actualCloseDate?: string;
-  status: DealStatus;
-  tags: string[];
-  notes?: string;
-  customFields?: Record<string, any>;
-  isDeleted: boolean;
-  userId: string;
-  contactId?: string;
-  contact?: Contact;
+  title: string
+  value: number
+  stage: 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost'
+  probability: number
+  expectedCloseDate?: string
+  actualCloseDate?: string
+  closeReason?: string
+  notes?: string
+  contactId: string
+  userId: string
+  contact?: Contact
 }
 
-export type DealStage = 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closed-won' | 'closed-lost';
-export type DealStatus = 'open' | 'won' | 'lost' | 'on-hold';
-
-// Interaction types
+// Interaction Types
 export interface Interaction extends BaseEntity {
-  type: InteractionType;
-  subject: string;
-  description?: string;
-  date: string;
-  duration?: number;
-  outcome?: InteractionOutcome;
-  notes?: string;
-  tags: string[];
-  customFields?: Record<string, any>;
-  isDeleted: boolean;
-  userId: string;
-  contactId?: string;
-  dealId?: string;
-  contact?: Contact;
-  deal?: Deal;
+  type: 'call' | 'email' | 'meeting' | 'note' | 'task'
+  subject: string
+  description: string
+  date: string
+  duration?: number
+  contactId: string
+  dealId?: string
+  userId: string
+  contact?: Contact
+  deal?: Deal
 }
 
-export type InteractionType = 'call' | 'email' | 'meeting' | 'demo' | 'proposal' | 'follow-up' | 'other';
-export type InteractionOutcome = 'positive' | 'neutral' | 'negative' | 'no-response';
+// Objection Types
+export interface Objection extends BaseEntity {
+  text: string
+  category?: string
+  dealId?: string
+  contactId?: string
+  userId: string
+  aiResponses?: AIResponse[]
+}
 
-// API Response types
+// AI Types
+export interface AIResponse {
+  id: string
+  text: string
+  confidence: 'high' | 'medium' | 'low'
+  rating?: number
+  feedback?: 'positive' | 'negative'
+  createdAt: string
+}
+
+export interface AILog extends BaseEntity {
+  type: 'deal_coach' | 'persona_builder' | 'objection_handler' | 'win_loss_explainer'
+  input: string
+  output: string
+  confidence: 'high' | 'medium' | 'low'
+  userId: string
+  dealId?: string
+  contactId?: string
+  feedback?: 'positive' | 'negative'
+}
+
+// API Response Types
 export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
+  success: boolean
+  message: string
+  data?: T
+  error?: string
+  errors?: ValidationError[]
 }
 
-export interface PaginatedResponse<T> {
-  data: T[];
+export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
   pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
-  };
+    currentPage: number
+    totalPages: number
+    totalItems: number
+    itemsPerPage: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+  }
 }
 
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: string;
+export interface ValidationError {
+  field: string
+  message: string
 }
 
-export interface LoginResponse {
-  user: User;
-  tokens: AuthTokens;
+// Auth Types
+export interface LoginCredentials {
+  email: string
+  password: string
 }
 
-// Form types
-export interface LoginFormData {
-  email: string;
-  password: string;
+export interface RegisterData {
+  email: string
+  password: string
+  firstName: string
+  lastName: string
 }
 
-export interface RegisterFormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  company: string;
-  role: UserRole;
-  department?: string;
+export interface AuthResponse {
+  user: User
+  token: string
+  refreshToken: string
 }
 
+// Form Types
 export interface ContactFormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  company: string;
-  position?: string;
-  status: ContactStatus;
-  source: ContactSource;
-  tags: string[];
-  notes?: string;
-  socialProfiles?: SocialProfiles;
-  customFields?: Record<string, any>;
-  nextFollowUpDate?: string;
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  company?: string
+  role?: string
+  type: Contact['type']
+  tags?: string[]
+  notes?: string
 }
 
 export interface DealFormData {
-  title: string;
-  description?: string;
-  value: number;
-  currency: string;
-  stage: DealStage;
-  probability: number;
-  expectedCloseDate?: string;
-  tags: string[];
-  notes?: string;
-  customFields?: Record<string, any>;
-  contactId?: string;
+  title: string
+  value: number
+  stage: Deal['stage']
+  probability: number
+  expectedCloseDate?: string
+  notes?: string
+  contactId: string
 }
 
-export interface InteractionFormData {
-  type: InteractionType;
-  subject: string;
-  description?: string;
-  date: string;
-  duration?: number;
-  outcome?: InteractionOutcome;
-  notes?: string;
-  tags: string[];
-  customFields?: Record<string, any>;
-  contactId?: string;
-  dealId?: string;
+// Dashboard Types
+export interface DashboardMetrics {
+  totalContacts: number
+  totalDeals: number
+  totalRevenue: number
+  wonDeals: number
+  lostDeals: number
+  averageDealValue: number
+  conversionRate: number
+  aiRequestsUsed: number
+  aiRequestsRemaining: number
 }
 
-// Filter and search types
+export interface ChartData {
+  labels: string[]
+  datasets: {
+    label: string
+    data: number[]
+    backgroundColor?: string[]
+    borderColor?: string[]
+  }[]
+}
+
+// Filter Types
 export interface ContactFilters {
-  status?: ContactStatus[];
-  source?: ContactSource[];
-  tags?: string[];
-  company?: string;
-  dateRange?: {
-    start: string;
-    end: string;
-  };
+  search?: string
+  type?: Contact['type']
+  company?: string
+  tags?: string[]
+  page?: number
+  limit?: number
 }
 
 export interface DealFilters {
-  stage?: DealStage[];
-  status?: DealStatus[];
-  tags?: string[];
-  valueRange?: {
-    min: number;
-    max: number;
-  };
-  dateRange?: {
-    start: string;
-    end: string;
-  };
+  search?: string
+  stage?: Deal['stage']
+  minValue?: number
+  maxValue?: number
+  contactId?: string
+  page?: number
+  limit?: number
 }
 
-export interface SearchParams {
-  query?: string;
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-// UI Component types
+// UI Component Types
 export interface SelectOption {
-  value: string;
-  label: string;
-  disabled?: boolean;
+  value: string
+  label: string
 }
 
 export interface TableColumn<T = any> {
-  key: keyof T;
-  label: string;
-  sortable?: boolean;
-  render?: (value: any, item: T) => React.ReactNode;
+  key: keyof T
+  label: string
+  sortable?: boolean
+  render?: (value: any, item: T) => React.ReactNode
 }
 
-export interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  children: React.ReactNode;
+export interface TableProps<T = any> {
+  data: T[]
+  columns: TableColumn<T>[]
+  loading?: boolean
+  pagination?: {
+    currentPage: number
+    totalPages: number
+    onPageChange: (page: number) => void
+  }
+  onSort?: (key: keyof T, direction: 'asc' | 'desc') => void
 }
 
-// Error types
-export interface ValidationError {
-  field: string;
-  message: string;
+// Theme Types
+export type Theme = 'light' | 'dark'
+
+// Status Types
+export type Status = 'success' | 'warning' | 'error' | 'info'
+
+// Loading States
+export interface LoadingState {
+  isLoading: boolean
+  error?: string | null
 }
 
-export interface ApiError {
-  message: string;
-  status?: number;
-  errors?: ValidationError[];
+// Export utility types
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
 }
 
-// Constants
-export const USER_ROLES: SelectOption[] = [
-  { value: 'SDR', label: 'SDR (Sales Development Rep)' },
-  { value: 'AE', label: 'AE (Account Executive)' },
-  { value: 'Manager', label: 'Sales Manager' },
-  { value: 'Admin', label: 'Administrator' },
-];
-
-export const CONTACT_STATUSES: SelectOption[] = [
-  { value: 'new', label: 'New' },
-  { value: 'qualified', label: 'Qualified' },
-  { value: 'contacted', label: 'Contacted' },
-  { value: 'nurturing', label: 'Nurturing' },
-  { value: 'converted', label: 'Converted' },
-  { value: 'lost', label: 'Lost' },
-];
-
-export const CONTACT_SOURCES: SelectOption[] = [
-  { value: 'website', label: 'Website' },
-  { value: 'referral', label: 'Referral' },
-  { value: 'social', label: 'Social Media' },
-  { value: 'email', label: 'Email Campaign' },
-  { value: 'phone', label: 'Phone' },
-  { value: 'event', label: 'Event' },
-  { value: 'other', label: 'Other' },
-];
-
-export const DEAL_STAGES: SelectOption[] = [
-  { value: 'prospecting', label: 'Prospecting' },
-  { value: 'qualification', label: 'Qualification' },
-  { value: 'proposal', label: 'Proposal' },
-  { value: 'negotiation', label: 'Negotiation' },
-  { value: 'closed-won', label: 'Closed Won' },
-  { value: 'closed-lost', label: 'Closed Lost' },
-];
-
-export const INTERACTION_TYPES: SelectOption[] = [
-  { value: 'call', label: 'Phone Call' },
-  { value: 'email', label: 'Email' },
-  { value: 'meeting', label: 'Meeting' },
-  { value: 'demo', label: 'Demo' },
-  { value: 'proposal', label: 'Proposal' },
-  { value: 'follow-up', label: 'Follow-up' },
-  { value: 'other', label: 'Other' },
-]; 
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>> 

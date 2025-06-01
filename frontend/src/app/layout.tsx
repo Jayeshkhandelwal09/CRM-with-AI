@@ -1,26 +1,64 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter, Roboto } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Toaster } from "sonner";
 
-const inter = Inter({ subsets: ["latin"] });
+// Font configurations as per frontend design specs
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const roboto = Roboto({
+  subsets: ["latin"],
+  weight: ["300", "400"],
+  variable: "--font-roboto",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "AI-Powered CRM",
-  description: "Supercharge your sales with AI-powered insights and automation",
+  title: "CRM AI - AI-Powered Customer Relationship Management",
+  description: "Modern CRM with AI-powered features for sales teams. Manage contacts, deals, and get intelligent insights.",
+  keywords: ["CRM", "AI", "Sales", "Customer Management", "Deal Pipeline"],
+  authors: [{ name: "CRM AI Team" }],
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#3b82f6", // Primary blue from design specs
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className={`${inter.variable} ${roboto.variable}`}>
+      <body className={`${inter.className} antialiased bg-slate-50 text-slate-800`}>
         <AuthProvider>
-        {children}
+          {children}
         </AuthProvider>
+        <Toaster 
+          position="top-right"
+          richColors
+          closeButton
+          duration={4000}
+          toastOptions={{
+            style: {
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(148, 163, 184, 0.2)',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontFamily: 'var(--font-inter)',
+            },
+          }}
+        />
       </body>
     </html>
   );

@@ -1,242 +1,135 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { useAuth, withAuth } from '@/contexts/AuthContext';
-import MainLayout from '@/components/layout/MainLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
-function DashboardPage() {
-  const { user } = useAuth();
-
+export default function DashboardPage() {
   return (
-    <MainLayout>
-      <div className="space-y-6">
-        {/* Welcome Section */}
-        <div>
-          <h1 className="text-3xl font-bold text-near-white">Welcome back, {user?.firstName}!</h1>
-          <p className="text-cool-grey mt-2">
-            Ready to supercharge your sales with AI? Here's your overview.
-          </p>
-        </div>
-
-        {/* User Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card className="glass-card border-glass">
-            <CardHeader>
-              <CardTitle className="text-ice-blue">Profile Information</CardTitle>
-              <CardDescription className="text-cool-grey">
-                Your account details
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div>
-                <span className="text-cool-grey">Name: </span>
-                <span className="text-near-white">{user?.fullName}</span>
-              </div>
-              <div>
-                <span className="text-cool-grey">Email: </span>
-                <span className="text-near-white">{user?.email}</span>
-              </div>
-              <div>
-                <span className="text-cool-grey">Role: </span>
-                <span className="text-near-white">{user?.role}</span>
-              </div>
-              <div>
-                <span className="text-cool-grey">Company: </span>
-                <span className="text-near-white">{user?.company}</span>
-              </div>
-              {user?.department && (
-                <div>
-                  <span className="text-cool-grey">Department: </span>
-                  <span className="text-near-white">{user.department}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card border-glass">
-            <CardHeader>
-              <CardTitle className="text-ice-blue">AI Usage</CardTitle>
-              <CardDescription className="text-cool-grey">
-                Your daily AI request usage
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-cool-grey">Requests Used</span>
-                    <span className="text-near-white">
-                      {user?.aiRequestsUsed} / {user?.aiRequestsLimit}
-                    </span>
-                  </div>
-                  <div className="w-full bg-charcoal-glass rounded-full h-2">
-                    <div
-                      className="bg-ice-blue h-2 rounded-full transition-all duration-300"
-                      style={{
-                        width: `${((user?.aiRequestsUsed || 0) / (user?.aiRequestsLimit || 100)) * 100}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-                <p className="text-xs text-cool-grey">
-                  Resets daily at midnight
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card border-glass">
-            <CardHeader>
-              <CardTitle className="text-ice-blue">Account Status</CardTitle>
-              <CardDescription className="text-cool-grey">
-                Your account information
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div>
-                <span className="text-cool-grey">Status: </span>
-                <span className={`${user?.status === 'active' ? 'text-green-400' : 'text-yellow-400'}`}>
-                  {user?.status?.toUpperCase()}
-                </span>
-              </div>
-              <div>
-                <span className="text-cool-grey">Email Verified: </span>
-                <span className={user?.emailVerified ? 'text-green-400' : 'text-yellow-400'}>
-                  {user?.emailVerified ? 'Yes' : 'No'}
-                </span>
-              </div>
-              <div>
-                <span className="text-cool-grey">Onboarding: </span>
-                <span className={user?.onboardingCompleted ? 'text-green-400' : 'text-yellow-400'}>
-                  {user?.onboardingCompleted ? 'Complete' : 'Pending'}
-                </span>
-              </div>
-              <div>
-                <span className="text-cool-grey">Member Since: </span>
-                <span className="text-near-white">
-                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* AI Modules Preview */}
-        <div>
-          <h2 className="text-2xl font-bold text-near-white mb-4">AI-Powered Features</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="glass-card border-glass hover:border-ice-blue transition-colors cursor-pointer">
-              <CardHeader>
-                <CardTitle className="text-ice-blue flex items-center space-x-2">
-                  <span>🎯</span>
-                  <span>Deal Coach AI</span>
-                </CardTitle>
-                <CardDescription className="text-cool-grey">
-                  Get AI-powered insights to close deals faster
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-cool-grey">
-                  Coming soon in Phase 4...
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card border-glass hover:border-ice-blue transition-colors cursor-pointer">
-              <CardHeader>
-                <CardTitle className="text-ice-blue flex items-center space-x-2">
-                  <span>👤</span>
-                  <span>Persona Builder</span>
-                </CardTitle>
-                <CardDescription className="text-cool-grey">
-                  Build detailed customer personas with AI
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-cool-grey">
-                  Coming soon in Phase 4...
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card border-glass hover:border-ice-blue transition-colors cursor-pointer">
-              <CardHeader>
-                <CardTitle className="text-ice-blue flex items-center space-x-2">
-                  <span>🛡️</span>
-                  <span>Objection Handler</span>
-                </CardTitle>
-                <CardDescription className="text-cool-grey">
-                  Handle objections with AI-generated responses
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-cool-grey">
-                  Coming soon in Phase 4...
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card border-glass hover:border-ice-blue transition-colors cursor-pointer">
-              <CardHeader>
-                <CardTitle className="text-ice-blue flex items-center space-x-2">
-                  <span>📊</span>
-                  <span>Win/Loss Explainer</span>
-                </CardTitle>
-                <CardDescription className="text-cool-grey">
-                  Understand why deals succeed or fail
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-cool-grey">
-                  Coming soon in Phase 4...
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div>
-          <h2 className="text-2xl font-bold text-near-white mb-4">Quick Stats</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="glass-card border-glass">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-ice-blue">0</p>
-                  <p className="text-cool-grey text-sm">Total Contacts</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="glass-card border-glass">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-ice-blue">0</p>
-                  <p className="text-cool-grey text-sm">Active Deals</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="glass-card border-glass">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-ice-blue">$0</p>
-                  <p className="text-cool-grey text-sm">Pipeline Value</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="glass-card border-glass">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-ice-blue">0%</p>
-                  <p className="text-cool-grey text-sm">Win Rate</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    </MainLayout>
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
   );
 }
 
-export default withAuth(DashboardPage); 
+function DashboardContent() {
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    toast.info('Signing out...', {
+      description: 'You have been successfully signed out.',
+    });
+    logout();
+  };
+
+  return (
+    <main className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <header className="bg-white border-b border-slate-200">
+        <div className="container-responsive py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <span className="text-h3 font-semibold">CRM AI</span>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-label font-medium">
+                  {user?.firstName} {user?.lastName}
+                </p>
+                <p className="text-caption text-slate-600">{user?.email}</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="btn-ghost"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Dashboard Content */}
+      <div className="container-responsive py-8">
+        <div className="mb-8">
+          <h1 className="text-h1 mb-2">Welcome to your CRM Dashboard</h1>
+          <p className="text-body">
+            You&apos;re successfully authenticated! This is a protected page that requires login.
+          </p>
+        </div>
+
+        {/* Success Card */}
+        <div className="glass-card mb-8">
+          <div className="flex items-start gap-3">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-h3 mb-2">Authentication Complete!</h3>
+              <p className="text-body mb-4">
+                Your authentication system is working correctly. You can now access protected routes and your user data is available throughout the application.
+              </p>
+              <div className="space-y-2">
+                <p className="text-label"><strong>User ID:</strong> {user?.id}</p>
+                <p className="text-label"><strong>Email:</strong> {user?.email}</p>
+                <p className="text-label"><strong>Name:</strong> {user?.firstName} {user?.lastName}</p>
+                <p className="text-label"><strong>Member Since:</strong> {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Next Steps */}
+        <div className="glass-card-light">
+          <h3 className="text-h3 mb-4">Next Development Steps</h3>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="status-success">✓</span>
+              <span className="text-body">Landing page with navigation</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="status-success">✓</span>
+              <span className="text-body">Login and registration pages</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="status-success">✓</span>
+              <span className="text-body">Form validation</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="status-success">✓</span>
+              <span className="text-body">Authentication context</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="status-success">✓</span>
+              <span className="text-body">JWT token storage</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="status-success">✓</span>
+              <span className="text-body">Protected route wrapper</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="status-success">✓</span>
+              <span className="text-body">Sonner toast notifications</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="status-success">✓</span>
+              <span className="text-body">Password reset form</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="status-info">→</span>
+              <span className="text-body">Ready for Phase 3: Core Data Models</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+} 

@@ -1,193 +1,232 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-charcoal-glass to-slate-900 p-4">
-      {/* Header */}
-      <header className="glass-nav rounded-lg p-4 mb-8">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-ice-blue rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">🤖</span>
+    <main className="min-h-screen bg-slate-50">
+      {/* Navigation Header */}
+      <nav className="container-responsive py-4 border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
             </div>
-            <h1 className="text-xl font-bold text-ice-blue">AI-Powered CRM</h1>
+            <span className="text-h3 font-semibold">CRM AI</span>
           </div>
-          <nav className="hidden md:flex space-x-6">
-            <a href="#features" className="text-cool-grey hover:text-ice-blue transition-colors">Features</a>
-            <a href="#about" className="text-cool-grey hover:text-ice-blue transition-colors">About</a>
-            <a href="#contact" className="text-cool-grey hover:text-ice-blue transition-colors">Contact</a>
-          </nav>
-          <div className="flex space-x-3">
-            <Link href="/login">
-              <Button variant="outline" className="glass-secondary border-soft-purple text-soft-purple hover:bg-soft-purple hover:text-white">
-                Login
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button className="glass-button text-white">
-                Get Started
-              </Button>
-            </Link>
-          </div>
+          <Link href="/auth/login" className="btn-ghost">
+            Sign In
+          </Link>
         </div>
-      </header>
+      </nav>
 
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto">
+      <section className="container-responsive py-20">
         <div className="text-center mb-16">
-          <div className="glass-card p-12 mb-8">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              <span className="text-near-white">Next-Generation</span>
-              <br />
-              <span className="text-ice-blue">AI-Powered CRM</span>
-            </h1>
-            <p className="text-xl text-cool-grey mb-8 max-w-3xl mx-auto">
-              Transform your sales process with intelligent AI modules that provide real-time coaching, 
-              customer insights, objection handling, and deal analysis.
+          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-label font-medium mb-6">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            AI-Powered CRM Platform
+          </div>
+          
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Transform Your Sales
+            <br />
+            with <span className="text-blue-500">AI Intelligence</span>
+          </h1>
+          
+          <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8 leading-relaxed">
+            Streamline your customer relationships, accelerate deal closures, and unlock powerful insights 
+            with our AI-powered CRM designed for modern sales teams.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <Link href="/auth/register" className="btn-primary text-lg px-8 py-4">
+              Start Free Trial
+            </Link>
+            <button className="btn-secondary text-lg px-8 py-4">
+              Watch Demo
+            </button>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="flex items-center justify-center gap-8 text-slate-500 text-sm">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Free 14-day trial
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              No credit card required
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Setup in 5 minutes
+            </div>
+          </div>
+        </div>
+
+        {/* Feature Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          {/* Contact Management */}
+          <div className="glass-card group hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <h3 className="text-h3 mb-3">Smart Contact Management</h3>
+            <p className="text-body mb-4 text-slate-600">
+              Organize and track up to 2,000 contacts with AI-powered insights, smart categorization, and automated data enrichment.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/register">
-                <Button size="lg" className="glass-button text-white px-8 py-3">
-                  Start Free Trial
-                </Button>
-              </Link>
-              <Button size="lg" variant="outline" className="glass-secondary border-soft-purple text-soft-purple hover:bg-soft-purple hover:text-white px-8 py-3">
-                Watch Demo
-              </Button>
+            <div className="flex items-center gap-2">
+              <span className="status-info">2,000 contacts</span>
+              <span className="text-slate-400">•</span>
+              <span className="text-caption text-slate-500">AI-enhanced</span>
+            </div>
+          </div>
+
+          {/* Deal Pipeline */}
+          <div className="glass-card group hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <h3 className="text-h3 mb-3">Visual Deal Pipeline</h3>
+            <p className="text-body mb-4 text-slate-600">
+              Track up to 5,000 deals through customizable pipeline stages with intuitive drag-and-drop functionality and forecasting.
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="status-success">5,000 deals</span>
+              <span className="text-slate-400">•</span>
+              <span className="text-caption text-slate-500">Drag & drop</span>
+            </div>
+          </div>
+
+          {/* AI Features */}
+          <div className="ai-module-card group hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <h3 className="text-h3 mb-3">AI-Powered Insights</h3>
+            <p className="text-body mb-4 text-slate-600">
+              Get intelligent recommendations, deal coaching, customer persona insights, and predictive analytics powered by advanced AI.
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="status-warning">100 AI requests/day</span>
+              <span className="text-slate-400">•</span>
+              <span className="text-caption text-slate-500">Smart insights</span>
             </div>
           </div>
         </div>
 
-        {/* Features Grid */}
-        <div id="features" className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          <Card className="glass-card border-glass">
-            <CardHeader>
-              <div className="w-12 h-12 bg-ice-blue/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">🎯</span>
-              </div>
-              <CardTitle className="text-ice-blue">Deal Coach AI</CardTitle>
-              <CardDescription className="text-cool-grey">
-                Get 2-3 actionable next steps for every deal based on AI analysis
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm text-cool-grey space-y-2">
-                <li>• Smart deal progression tracking</li>
-                <li>• Idle deal notifications</li>
-                <li>• Stage-specific recommendations</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card border-glass">
-            <CardHeader>
-              <div className="w-12 h-12 bg-soft-purple/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">👤</span>
-              </div>
-              <CardTitle className="text-soft-purple">Persona Builder</CardTitle>
-              <CardDescription className="text-cool-grey">
-                Automatically generate behavioral profiles of your contacts
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm text-cool-grey space-y-2">
-                <li>• Communication style analysis</li>
-                <li>• Decision-making patterns</li>
-                <li>• Engagement level tracking</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card border-glass">
-            <CardHeader>
-              <div className="w-12 h-12 bg-ice-blue/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">💬</span>
-              </div>
-              <CardTitle className="text-ice-blue">Objection Handler</CardTitle>
-              <CardDescription className="text-cool-grey">
-                Get persuasive responses to common sales objections
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm text-cool-grey space-y-2">
-                <li>• Multiple response strategies</li>
-                <li>• Tone matching to persona</li>
-                <li>• Follow-up question suggestions</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card className="glass-card border-glass">
-            <CardHeader>
-              <div className="w-12 h-12 bg-soft-purple/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">📊</span>
-              </div>
-              <CardTitle className="text-soft-purple">Win/Loss Explainer</CardTitle>
-              <CardDescription className="text-cool-grey">
-                Understand why deals succeed or fail with AI analysis
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="text-sm text-cool-grey space-y-2">
-                <li>• Timeline analysis</li>
-                <li>• Objection impact assessment</li>
-                <li>• Competitive factor review</li>
-              </ul>
-            </CardContent>
-          </Card>
+        {/* Social Proof Section */}
+        <div className="glass-card-light text-center">
+          <h3 className="text-h3 mb-6">Trusted by Sales Teams Worldwide</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center opacity-60">
+            <div className="text-slate-500 font-semibold">TechCorp</div>
+            <div className="text-slate-500 font-semibold">SalesForce Pro</div>
+            <div className="text-slate-500 font-semibold">Growth Inc</div>
+            <div className="text-slate-500 font-semibold">Revenue Co</div>
+          </div>
         </div>
+      </section>
 
-        {/* Stats Section */}
-        <div className="glass-card p-8 mb-16">
-          <div className="grid md:grid-cols-3 gap-8 text-center">
+      {/* Features Overview */}
+      <section className="bg-white py-20">
+        <div className="container-responsive">
+          <div className="text-center mb-16">
+            <h2 className="text-h1 mb-4">Everything You Need to Close More Deals</h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Our comprehensive CRM platform combines powerful features with AI intelligence to supercharge your sales process.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="text-4xl font-bold text-ice-blue mb-2">40%</div>
-              <div className="text-cool-grey">Increase in Deal Closure Rate</div>
+              <h3 className="text-h2 mb-6">Built for Modern Sales Teams</h3>
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-h3 mb-2">Intelligent Lead Scoring</h4>
+                    <p className="text-body text-slate-600">AI analyzes your leads and prioritizes the most promising opportunities automatically.</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-h3 mb-2">Automated Follow-ups</h4>
+                    <p className="text-body text-slate-600">Never miss a follow-up with smart reminders and automated email sequences.</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-h3 mb-2">Real-time Analytics</h4>
+                    <p className="text-body text-slate-600">Track performance with detailed reports and actionable insights in real-time.</p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <div className="text-4xl font-bold text-soft-purple mb-2">75%</div>
-              <div className="text-cool-grey">Positive AI Feedback Rating</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-ice-blue mb-2">3x</div>
-              <div className="text-cool-grey">Faster Deal Progression</div>
+
+            <div className="glass-card">
+              <div className="aspect-video bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-label text-slate-600">Interactive Demo Coming Soon</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* CTA Section */}
-        <div id="about" className="glass-card p-12 text-center">
-          <h2 className="text-3xl font-bold text-near-white mb-4">
-            Ready to Transform Your Sales Process?
-          </h2>
-          <p className="text-cool-grey mb-8 max-w-2xl mx-auto">
-            Join thousands of sales professionals who are already using AI to close more deals faster.
+      {/* CTA Section */}
+      <section className="bg-gradient-to-r from-blue-600 to-purple-600 py-20">
+        <div className="container-responsive text-center">
+          <h2 className="text-h1 text-white mb-4">Ready to Transform Your Sales Process?</h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Join thousands of sales teams who have already boosted their revenue with CRM AI.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register">
-              <Button size="lg" className="glass-button text-white px-8 py-3">
-                Start Your Free Trial Today
-              </Button>
+            <Link href="/auth/register" className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-lg font-semibold text-lg transition-colors">
+              Start Your Free Trial
             </Link>
-            <Link href="/login">
-              <Button size="lg" variant="outline" className="glass-secondary border-soft-purple text-soft-purple hover:bg-soft-purple hover:text-white px-8 py-3">
-                Already have an account? Sign In
-              </Button>
+            <Link href="/auth/login" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg transition-colors">
+              Sign In
             </Link>
           </div>
         </div>
-      </main>
-
-      {/* Footer */}
-      <footer id="contact" className="glass-nav rounded-lg p-6 mt-16">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-cool-grey">
-            © 2024 AI-Powered CRM. Built with Next.js, Express.js, and OpenAI.
-          </p>
-        </div>
-      </footer>
-    </div>
+      </section>
+    </main>
   );
 }
