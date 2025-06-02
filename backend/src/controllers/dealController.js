@@ -3,6 +3,7 @@ const Contact = require('../models/Contact');
 const User = require('../models/User');
 const Interaction = require('../models/Interaction');
 const logger = require('../utils/logger');
+const mongoose = require('mongoose');
 
 /**
  * Get all deals with filtering, pagination, and search
@@ -500,15 +501,36 @@ const getPipelineOverview = async (req, res) => {
     const userId = req.user.id;
     const { pipeline = 'sales' } = req.query;
 
-    // Get pipeline summary using the model's static method (active deals only)
-    const pipelineSummary = await Deal.getPipelineSummary(userId);
+    // Get pipeline summary for ALL deals (not just active) for the stage breakdown
+    const allDealsPipelineSummary = await Deal.aggregate([
+      { 
+        $match: { 
+          owner: mongoose.Types.ObjectId.isValid(userId) 
+            ? new mongoose.Types.ObjectId(userId) 
+            : userId
+        } 
+      },
+      {
+        $group: {
+          _id: '$stage',
+          count: { $sum: 1 },
+          totalValue: { $sum: '$value' },
+          totalWeightedValue: { $sum: '$weightedValue' },
+          avgProbability: { $avg: '$probability' }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Get pipeline summary for active deals only (for active pipeline calculations)
+    const activePipelineSummary = await Deal.getPipelineSummary(userId);
 
     // Define all possible stages to ensure they're all represented
     const allStages = ['lead', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost'];
     
-    // Map the pipeline summary to the expected format and ensure all stages are included
+    // Map ALL deals pipeline summary to the expected format and ensure all stages are included
     const mappedPipelineStages = allStages.map(stageName => {
-      const stageData = pipelineSummary.find(stage => stage._id === stageName);
+      const stageData = allDealsPipelineSummary.find(stage => stage._id === stageName);
       return {
         stage: stageName,
         count: stageData?.count || 0,
@@ -518,9 +540,9 @@ const getPipelineOverview = async (req, res) => {
       };
     });
     
-    // Calculate totals from pipeline summary (active deals only)
-    const activePipelineValue = pipelineSummary.reduce((total, stage) => total + (stage.totalValue || 0), 0);
-    const totalWeightedValue = pipelineSummary.reduce((total, stage) => total + (stage.totalWeightedValue || 0), 0);
+    // Calculate totals from ACTIVE pipeline summary only
+    const activePipelineValue = activePipelineSummary.reduce((total, stage) => total + (stage.totalValue || 0), 0);
+    const totalWeightedValue = activePipelineSummary.reduce((total, stage) => total + (stage.totalWeightedValue || 0), 0);
     
     // Get additional metrics
     const totalDeals = await Deal.countDocuments({ owner: userId });
@@ -551,7 +573,13 @@ const getPipelineOverview = async (req, res) => {
 
     // Calculate average deal value (using all deals for this metric)
     const allDealsValue = await Deal.aggregate([
-      { $match: { owner: userId } },
+      { 
+        $match: { 
+          owner: mongoose.Types.ObjectId.isValid(userId) 
+            ? new mongoose.Types.ObjectId(userId) 
+            : userId
+        } 
+      },
       { $group: { _id: null, total: { $sum: '$value' } } }
     ]);
     const averageDealValue = totalDeals > 0 ? Math.round((allDealsValue[0]?.total || 0) / totalDeals) : 0;
@@ -568,6 +596,13 @@ const getPipelineOverview = async (req, res) => {
       calculation: `${wonDeals} / ${totalClosedDeals} * 100 = ${winRate}%`
     });
 
+    console.log('📊 Average deal calculation:', {
+      totalDeals,
+      totalValue: allDealsValue[0]?.total || 0,
+      averageDealValue,
+      calculation: `${allDealsValue[0]?.total || 0} / ${totalDeals} = ${averageDealValue}`
+    });
+
     logger.info(`Retrieved pipeline overview for user ${userId}`, {
       userId,
       totalDeals,
@@ -576,6 +611,7 @@ const getPipelineOverview = async (req, res) => {
       lostDeals,
       winRate,
       activePipelineValue,
+      averageDealValue,
       pipelineStages: mappedPipelineStages.length
     });
 
