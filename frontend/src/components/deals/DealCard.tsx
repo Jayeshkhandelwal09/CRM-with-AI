@@ -71,8 +71,8 @@ export function DealCard({ deal, isDragging = false }: DealCardProps) {
   const cardContent = (
     <div
       className={`
-        bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 
-        transition-all duration-200 hover:shadow-md relative
+        bg-white/85 dark:bg-slate-800/95 backdrop-blur-sm border border-slate-200/70 dark:border-slate-700/70 
+        rounded-lg shadow-sm hover:shadow-md transition-all duration-200 relative
         ${isDragging || isSortableDragging ? 'opacity-50 shadow-lg scale-105' : ''}
         ${isOverdue ? 'border-red-300 dark:border-red-600' : ''}
         ${isUrgent ? 'border-orange-300 dark:border-orange-600' : ''}
@@ -82,14 +82,14 @@ export function DealCard({ deal, isDragging = false }: DealCardProps) {
       <div
         {...attributes}
         {...listeners}
-        className="absolute top-2 right-2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-grab active:cursor-grabbing"
+        className="absolute top-2 right-2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-grab active:cursor-grabbing z-10"
         title="Drag to move deal"
       >
         <Bars3Icon className="w-4 h-4" />
       </div>
 
       {/* Clickable Content Area */}
-      <Link href={`/dashboard/deals/${deal._id || deal.id}`} className="block p-4 pr-8">
+      <Link href={`/dashboard/deals/${deal._id || deal.id}`} className="block p-4 pr-8 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">
         {/* Deal Header */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">

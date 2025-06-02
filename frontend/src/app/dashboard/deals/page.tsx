@@ -56,7 +56,6 @@ function DealsContent() {
   const [pipelineOverview, setPipelineOverview] = useState<PipelineOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [metricsLoading, setMetricsLoading] = useState(true);
-  const [searchLoading, setSearchLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [showMetrics, setShowMetrics] = useState(true);
@@ -75,24 +74,7 @@ function DealsContent() {
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const debouncedFilters = useDebounce(filters, 300);
 
-  // Track if search is being debounced
-  useEffect(() => {
-    if (searchQuery !== debouncedSearchQuery) {
-      setSearchLoading(true);
-    } else {
-      setSearchLoading(false);
-    }
-  }, [searchQuery, debouncedSearchQuery]);
-
-  // Load deals and pipeline overview
-  const loadData = useCallback(async () => {
-    await Promise.all([loadDeals(), loadPipelineOverview()]);
-  }, [debouncedSearchQuery, debouncedFilters]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
+  // Load deals when search/filters change
   const loadDeals = useCallback(async () => {
     try {
       setLoading(true);
@@ -139,6 +121,7 @@ function DealsContent() {
     }
   }, [debouncedSearchQuery, debouncedFilters]);
 
+  // Load pipeline overview independently (only once on mount and after deal updates)
   const loadPipelineOverview = useCallback(async () => {
     try {
       setMetricsLoading(true);
@@ -153,6 +136,16 @@ function DealsContent() {
       setMetricsLoading(false);
     }
   }, []);
+
+  // Initial load
+  useEffect(() => {
+    loadDeals();
+  }, [loadDeals]);
+
+  // Load metrics only once on mount
+  useEffect(() => {
+    loadPipelineOverview();
+  }, [loadPipelineOverview]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -183,7 +176,7 @@ function DealsContent() {
       const updateData: any = { stage: newStage };
       await api.updateDeal(dealId, updateData);
       
-      // Reload pipeline overview to update metrics
+      // Reload pipeline overview to update metrics after stage change
       loadPipelineOverview();
       toast.success(`Deal moved to ${newStage.replace('_', ' ')}`);
     } catch (error) {
@@ -198,7 +191,7 @@ function DealsContent() {
     }
   };
 
-  const handleFilterChange = (newFilters: typeof filters) => {
+  const handleFiltersChange = (newFilters: typeof filters) => {
     setFilters(newFilters);
   };
 
@@ -454,11 +447,6 @@ function DealsContent() {
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <MagnifyingGlassIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
             </div>
-            {searchLoading && (
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-              </div>
-            )}
             <input
               type="text"
               value={searchQuery}
@@ -482,7 +470,7 @@ function DealsContent() {
         {showFilters && (
           <DealFilters
             filters={filters}
-            onFiltersChange={handleFilterChange}
+            onFiltersChange={handleFiltersChange}
             onClear={clearAllFilters}
           />
         )}
