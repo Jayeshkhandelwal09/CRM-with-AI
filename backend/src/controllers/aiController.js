@@ -114,6 +114,7 @@ class AIController {
         userPrompt,
         {
           userId,
+          dealId: dealId,
           ragContext: similarDeals,
           maxTokens: 400
         }
@@ -210,6 +211,7 @@ class AIController {
         userPrompt,
         {
           userId,
+          ...(dealId && { dealId: dealId }),
           ragContext: similarObjections,
           maxTokens: 350
         }
@@ -405,6 +407,7 @@ class AIController {
         userPrompt,
         {
           userId,
+          dealId: dealId,
           ragContext: similarDeals,
           maxTokens: 500
         }

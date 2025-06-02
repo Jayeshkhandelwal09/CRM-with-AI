@@ -115,15 +115,42 @@ class AIService {
    * @returns {string} - Cache key
    */
   generateCacheKey(feature, params) {
-    // For persona builder, include contactId to ensure unique cache per contact
-    if (feature === 'persona_builder' && params.options && params.options.contactId) {
-      // Create a hash from the combined prompts for uniqueness
-      const crypto = require('crypto');
-      const promptContent = params.systemPrompt + '|' + params.userPrompt;
-      const promptHash = crypto.createHash('md5').update(promptContent).digest('hex').slice(0, 8);
-      return `${feature}_${params.options.contactId}_${promptHash}`;
+    const crypto = require('crypto');
+    
+    // Create base content from prompts
+    const promptContent = params.systemPrompt + '|' + params.userPrompt;
+    const promptHash = crypto.createHash('md5').update(promptContent).digest('hex').slice(0, 8);
+    
+    // Include specific IDs based on feature type to ensure unique cache per entity
+    switch (feature) {
+      case 'persona_builder':
+        // For persona builder, include contactId
+        if (params.options && params.options.contactId) {
+          return `${feature}_${params.options.contactId}_${promptHash}`;
+        }
+        break;
+        
+      case 'deal_coach':
+      case 'win_loss_explainer':
+        // For deal-related features, include dealId from options
+        if (params.options && params.options.dealId) {
+          return `${feature}_${params.options.dealId}_${promptHash}`;
+        }
+        break;
+        
+      case 'objection_handler':
+        // For objection handler, include dealId if available, otherwise use objection text hash
+        if (params.options && params.options.dealId) {
+          return `${feature}_${params.options.dealId}_${promptHash}`;
+        } else {
+          // Use a hash of the objection text for uniqueness when no dealId
+          const objectionHash = crypto.createHash('md5').update(params.userPrompt).digest('hex').slice(0, 12);
+          return `${feature}_${objectionHash}_${promptHash}`;
+        }
+        break;
     }
     
+    // Fallback to generic cache key (should rarely be used with proper ID passing)
     const paramsString = JSON.stringify(params);
     return `${feature}_${Buffer.from(paramsString).toString('base64').slice(0, 20)}`;
   }
