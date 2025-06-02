@@ -494,18 +494,42 @@ export const api = {
   async getDeals(params?: {
     page?: number;
     limit?: number;
-    stage?: string;
+    stage?: string | string[];
     search?: string;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
+    priority?: string;
+    source?: string;
+    dealType?: string;
+    isActive?: boolean;
+    isClosed?: boolean;
+    minValue?: number;
+    maxValue?: number;
+    expectedCloseDateFrom?: string;
+    expectedCloseDateTo?: string;
   }): Promise<ApiResponse<PaginatedResponse<Deal>>> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.stage) queryParams.append('stage', params.stage);
+    if (params?.stage) {
+      if (Array.isArray(params.stage)) {
+        params.stage.forEach(s => queryParams.append('stage', s));
+      } else {
+        queryParams.append('stage', params.stage);
+      }
+    }
     if (params?.search) queryParams.append('search', params.search);
     if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
     if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+    if (params?.priority) queryParams.append('priority', params.priority);
+    if (params?.source) queryParams.append('source', params.source);
+    if (params?.dealType) queryParams.append('dealType', params.dealType);
+    if (params?.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
+    if (params?.isClosed !== undefined) queryParams.append('isClosed', params.isClosed.toString());
+    if (params?.minValue) queryParams.append('minValue', params.minValue.toString());
+    if (params?.maxValue) queryParams.append('maxValue', params.maxValue.toString());
+    if (params?.expectedCloseDateFrom) queryParams.append('expectedCloseDateFrom', params.expectedCloseDateFrom);
+    if (params?.expectedCloseDateTo) queryParams.append('expectedCloseDateTo', params.expectedCloseDateTo);
     
     const query = queryParams.toString();
     return apiClient.get(`/deals${query ? `?${query}` : ''}`);

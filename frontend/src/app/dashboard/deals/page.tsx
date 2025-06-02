@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, closestCorners } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { MagnifyingGlassIcon, PlusIcon, FunnelIcon, ChartBarIcon } from '@heroicons/react/24/outline';
@@ -24,6 +24,23 @@ const PIPELINE_STAGES = [
   { id: 'closed_lost', name: 'Closed Lost', color: 'bg-red-100 dark:bg-red-900/30' }
 ];
 
+// Custom hook for debouncing
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 export default function DealsPage() {
   return (
     <ProtectedRoute>
@@ -39,6 +56,7 @@ function DealsContent() {
   const [pipelineOverview, setPipelineOverview] = useState<PipelineOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [metricsLoading, setMetricsLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [showMetrics, setShowMetrics] = useState(true);
@@ -53,24 +71,48 @@ function DealsContent() {
     expectedCloseDateTo: ''
   });
 
-  // Load deals and pipeline overview
-  useEffect(() => {
-    const loadData = async () => {
-      await Promise.all([loadDeals(), loadPipelineOverview()]);
-    };
-    loadData();
-  }, [searchQuery, filters]);
+  // Debounce search and filters to prevent excessive API calls
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const debouncedFilters = useDebounce(filters, 300);
 
-  const loadDeals = async () => {
+  // Track if search is being debounced
+  useEffect(() => {
+    if (searchQuery !== debouncedSearchQuery) {
+      setSearchLoading(true);
+    } else {
+      setSearchLoading(false);
+    }
+  }, [searchQuery, debouncedSearchQuery]);
+
+  // Load deals and pipeline overview
+  const loadData = useCallback(async () => {
+    await Promise.all([loadDeals(), loadPipelineOverview()]);
+  }, [debouncedSearchQuery, debouncedFilters]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const loadDeals = useCallback(async () => {
     try {
       setLoading(true);
-      const params = {
-        search: searchQuery,
+      const params: any = {
         limit: 1000, // Load all deals for pipeline view
-        ...Object.fromEntries(
-          Object.entries(filters).filter(([, value]) => value !== '')
-        )
       };
+
+      // Add search if present
+      if (debouncedSearchQuery.trim()) {
+        params.search = debouncedSearchQuery.trim();
+      }
+
+      // Add filters if they have values
+      if (debouncedFilters.stage) params.stage = debouncedFilters.stage;
+      if (debouncedFilters.priority) params.priority = debouncedFilters.priority;
+      if (debouncedFilters.source) params.source = debouncedFilters.source;
+      if (debouncedFilters.minValue) params.minValue = parseInt(debouncedFilters.minValue);
+      if (debouncedFilters.maxValue) params.maxValue = parseInt(debouncedFilters.maxValue);
+      if (debouncedFilters.expectedCloseDateFrom) params.expectedCloseDateFrom = debouncedFilters.expectedCloseDateFrom;
+      if (debouncedFilters.expectedCloseDateTo) params.expectedCloseDateTo = debouncedFilters.expectedCloseDateTo;
       
       const response = await api.getDeals(params);
       if (response.success && response.data) {
@@ -95,9 +137,9 @@ function DealsContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [debouncedSearchQuery, debouncedFilters]);
 
-  const loadPipelineOverview = async () => {
+  const loadPipelineOverview = useCallback(async () => {
     try {
       setMetricsLoading(true);
       const response = await api.getPipelineOverview();
@@ -110,7 +152,7 @@ function DealsContent() {
     } finally {
       setMetricsLoading(false);
     }
-  };
+  }, []);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -162,6 +204,19 @@ function DealsContent() {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      stage: '',
+      priority: '',
+      source: '',
+      minValue: '',
+      maxValue: '',
+      expectedCloseDateFrom: '',
+      expectedCloseDateTo: ''
+    });
+    setSearchQuery('');
   };
 
   const getDealsForStage = (stageId: string) => {
@@ -399,11 +454,16 @@ function DealsContent() {
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <MagnifyingGlassIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
             </div>
+            {searchLoading && (
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+              </div>
+            )}
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              className="block w-full pl-10 pr-10 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
               placeholder="Search deals by title, company, or contact..."
             />
           </div>
@@ -423,15 +483,7 @@ function DealsContent() {
           <DealFilters
             filters={filters}
             onFiltersChange={handleFilterChange}
-            onClear={() => setFilters({
-              stage: '',
-              priority: '',
-              source: '',
-              minValue: '',
-              maxValue: '',
-              expectedCloseDateFrom: '',
-              expectedCloseDateTo: ''
-            })}
+            onClear={clearAllFilters}
           />
         )}
       </div>
