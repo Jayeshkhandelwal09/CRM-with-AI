@@ -25,41 +25,31 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>('light');
+  const [theme, setThemeState] = useState<Theme>('dark');
 
-  // Initialize theme from localStorage or system preference
+  // Initialize theme to always be dark
   useEffect(() => {
-    const savedTheme = localStorage.getItem('crm-theme') as Theme;
-    if (savedTheme) {
-      setThemeState(savedTheme);
-    } else {
-      // Check system preference
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setThemeState(systemPrefersDark ? 'dark' : 'light');
-    }
+    setThemeState('dark');
   }, []);
 
-  // Apply theme to document
+  // Apply dark theme to document
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('crm-theme', theme);
+    root.classList.add('dark');
+    localStorage.setItem('crm-theme', 'dark');
   }, [theme]);
 
   const toggleTheme = () => {
-    setThemeState(prev => prev === 'light' ? 'dark' : 'light');
+    // Do nothing - theme toggle is disabled
   };
 
   const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
+    // Always keep dark theme
+    setThemeState('dark');
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme: 'dark', toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );
