@@ -223,6 +223,21 @@ class AIService {
       const cacheKey = this.generateCacheKey(feature, { systemPrompt, userPrompt });
       const cachedResponse = this.getCachedResponse(cacheKey);
       if (cachedResponse && !options.skipCache) {
+        console.log(`📦 Cache hit for key: ${cacheKey.substring(0, 50)}...`);
+        
+        // Log cached request with minimal response time for analytics
+        const responseTime = Date.now() - startTime;
+        if (options.userId) {
+          await this.logAIRequest(
+            feature,
+            options.userId,
+            { systemPrompt, userPrompt, options },
+            cachedResponse,
+            'completed',
+            responseTime // This will be very small (1-5ms) but still logged
+          );
+        }
+        
         return cachedResponse;
       }
 
@@ -293,30 +308,28 @@ class AIService {
    * Calculate confidence score based on response and context
    * @param {Object} response - OpenAI response
    * @param {Array} ragContext - RAG context data
-   * @returns {string} - Confidence level (low/medium/high)
+   * @returns {number} - Confidence score (0-100)
    */
   calculateConfidence(response, ragContext = []) {
-    let score = 0.5; // Base score
+    let score = 50; // Base score (50%)
 
     // Factor 1: RAG context quality
     if (ragContext.length > 0) {
       const avgSimilarity = ragContext.reduce((sum, ctx) => sum + (ctx.similarity || 0), 0) / ragContext.length;
-      score += avgSimilarity * 0.3; // Up to 30% boost from context
+      score += avgSimilarity * 30; // Up to 30% boost from context
     }
 
     // Factor 2: Response length (longer responses often more confident)
     const responseLength = response.choices?.[0]?.message?.content?.length || 0;
-    if (responseLength > 200) score += 0.1;
-    if (responseLength > 500) score += 0.1;
+    if (responseLength > 200) score += 10;
+    if (responseLength > 500) score += 10;
 
     // Factor 3: Token usage efficiency
     const usage = response.usage;
-    if (usage && usage.completion_tokens > 50) score += 0.1;
+    if (usage && usage.completion_tokens > 50) score += 10;
 
-    // Convert to categorical confidence
-    if (score >= 0.8) return 'high';
-    if (score >= 0.6) return 'medium';
-    return 'low';
+    // Ensure score is within bounds
+    return Math.min(Math.max(Math.round(score), 0), 100);
   }
 
   /**
@@ -329,25 +342,25 @@ class AIService {
     const fallbacks = {
       'deal_coach': {
         content: 'Unable to generate AI suggestions at the moment. Try following up with the prospect or reviewing deal notes.',
-        confidence: 'low'
+        confidence: 25
       },
       'objection_handler': {
         content: 'AI response unavailable. Consider acknowledging the concern and asking clarifying questions.',
-        confidence: 'low'
+        confidence: 25
       },
       'persona_builder': {
         content: 'Persona analysis temporarily unavailable. Review interaction history manually.',
-        confidence: 'low'
+        confidence: 25
       },
       'win_loss_explainer': {
         content: 'Deal analysis unavailable. Review timeline and objections manually.',
-        confidence: 'low'
+        confidence: 25
       }
     };
 
     return {
       content: fallbacks[feature]?.content || 'AI service temporarily unavailable.',
-      confidence: 'low',
+      confidence: fallbacks[feature]?.confidence || 25,
       error: error.message,
       fallback: true,
       timestamp: new Date().toISOString()

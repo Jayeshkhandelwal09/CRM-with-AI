@@ -183,12 +183,29 @@ class VectorService {
       // Generate query embedding
       const queryEmbedding = await this.generateEmbedding(queryText);
 
-      // Search for similar vectors
-      const results = await collection.query({
+      // Clean up whereFilter - remove undefined values and empty objects
+      const cleanWhereFilter = {};
+      if (whereFilter && typeof whereFilter === 'object') {
+        Object.keys(whereFilter).forEach(key => {
+          if (whereFilter[key] !== undefined && whereFilter[key] !== null && whereFilter[key] !== '') {
+            cleanWhereFilter[key] = whereFilter[key];
+          }
+        });
+      }
+
+      // Prepare query options
+      const queryOptions = {
         queryEmbeddings: [queryEmbedding],
-        nResults: limit,
-        where: Object.keys(whereFilter).length > 0 ? whereFilter : undefined
-      });
+        nResults: limit
+      };
+
+      // Only add where clause if we have valid filters
+      if (Object.keys(cleanWhereFilter).length > 0) {
+        queryOptions.where = cleanWhereFilter;
+      }
+
+      // Search for similar vectors
+      const results = await collection.query(queryOptions);
 
       // Format results
       const formattedResults = [];
@@ -209,7 +226,8 @@ class VectorService {
       
     } catch (error) {
       console.error(`❌ Similarity search failed in ${collectionName}:`, error);
-      throw error;
+      // Return empty results instead of throwing error to prevent breaking the AI response
+      return [];
     }
   }
 

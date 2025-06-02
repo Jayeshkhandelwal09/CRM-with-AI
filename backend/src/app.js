@@ -17,6 +17,7 @@ const contactRoutes = require('./routes/contacts');
 const csvRoutes = require('./routes/csv');
 const dealRoutes = require('./routes/deals');
 const userRoutes = require('./routes/users');
+const aiRoutes = require('./routes/ai');
 
 const app = express();
 
@@ -93,6 +94,7 @@ app.use('/api/contacts', contactRoutes);
 app.use('/api/csv', csvRoutes);
 app.use('/api/deals', dealRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/ai', aiRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

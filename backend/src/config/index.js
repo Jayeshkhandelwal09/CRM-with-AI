@@ -25,7 +25,7 @@ const config = {
 
   // AI Configuration
   openaiApiKey: process.env.OPENAI_API_KEY,
-  aiRequestsPerDay: parseInt(process.env.AI_REQUESTS_PER_DAY) || 100,
+  aiRequestsPerDay: parseInt(process.env.AI_REQUESTS_PER_DAY) || 500,
 
   // File Upload Configuration
   maxFileSize: parseInt(process.env.MAX_FILE_SIZE) || 5242880, // 5MB
@@ -49,7 +49,7 @@ const config = {
     contactsPerUser: 2000,
     dealsPerUser: 5000,
     csvImportMaxRecords: 1000,
-    aiRequestsPerDay: 100,
+    aiRequestsPerDay: 500,
   },
 };
 

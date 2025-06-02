@@ -11,7 +11,7 @@ const aiLogSchema = new mongoose.Schema({
   requestType: {
     type: String,
     required: [true, 'Request type is required'],
-    enum: ['generate', 'analyze', 'suggest', 'explain', 'build'],
+    enum: ['generate', 'analyze', 'suggest', 'explain', 'build', 'feedback'],
     lowercase: true
   },
   
