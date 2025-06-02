@@ -27,6 +27,9 @@ const config = {
   openaiApiKey: process.env.OPENAI_API_KEY,
   aiRequestsPerDay: parseInt(process.env.AI_REQUESTS_PER_DAY) || 500,
 
+  // ChromaDB Configuration
+  chromaUrl: process.env.CHROMA_URL || 'http://localhost:8000',
+
   // File Upload Configuration
   maxFileSize: parseInt(process.env.MAX_FILE_SIZE) || 5242880, // 5MB
   uploadPath: process.env.UPLOAD_PATH || 'uploads/',

@@ -79,6 +79,29 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// ChromaDB health check endpoint
+app.get('/api/health/chromadb', async (req, res) => {
+  try {
+    const VectorService = require('./services/vectorService');
+    const vectorService = new VectorService();
+    const health = await vectorService.healthCheck();
+    
+    res.status(200).json({
+      success: true,
+      message: 'ChromaDB health check',
+      data: health,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(503).json({
+      success: false,
+      message: 'ChromaDB health check failed',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // API routes
 app.get('/api', (req, res) => {
   res.status(200).json({
