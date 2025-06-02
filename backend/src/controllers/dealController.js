@@ -542,15 +542,15 @@ const getPipelineOverview = async (req, res) => {
       };
     });
     
-    // Calculate totals from ACTIVE pipeline summary only
+    // Calculate totals from ACTIVE pipeline summary only (excluding closed deals)
     const activePipelineValue = activePipelineSummary.reduce((total, stage) => total + (stage.totalValue || 0), 0);
     const totalWeightedValue = activePipelineSummary.reduce((total, stage) => total + (stage.totalWeightedValue || 0), 0);
     
-    // Get additional metrics
+    // Get additional metrics with proper queries
     const totalDeals = await Deal.countDocuments({ owner: userId });
     const activeDeals = await Deal.countDocuments({ owner: userId, isActive: true });
     const closedDeals = await Deal.countDocuments({ owner: userId, isClosed: true });
-    const wonDeals = await Deal.countDocuments({ owner: userId, isWon: true });
+    const wonDeals = await Deal.countDocuments({ owner: userId, stage: 'closed_won' });
     const lostDeals = await Deal.countDocuments({ owner: userId, stage: 'closed_lost' });
     const overdueDeals = await Deal.countDocuments({
       owner: userId,
@@ -559,7 +559,7 @@ const getPipelineOverview = async (req, res) => {
     });
 
     // Debug logging for win rate calculation
-    console.log('🔍 Deal counts for win rate calculation:', {
+    console.log('🔍 Deal counts for metrics calculation:', {
       userId,
       totalDeals,
       activeDeals,
@@ -571,9 +571,12 @@ const getPipelineOverview = async (req, res) => {
 
     // Let's also check what deals actually exist
     const allUserDeals = await Deal.find({ owner: userId }).select('title stage isWon isClosed isActive value').lean();
-    console.log('📋 All user deals:', allUserDeals);
+    console.log('📋 All user deals breakdown:');
+    allUserDeals.forEach(deal => {
+      console.log(`  - ${deal.title}: stage=${deal.stage}, isActive=${deal.isActive}, isClosed=${deal.isClosed}, isWon=${deal.isWon}, value=$${deal.value}`);
+    });
 
-    // Calculate average deal value (using all deals for this metric)
+    // Calculate average deal value (using ALL deals for this metric)
     const allDealsValue = await Deal.aggregate([
       { 
         $match: { 
@@ -586,24 +589,17 @@ const getPipelineOverview = async (req, res) => {
     ]);
     const averageDealValue = totalDeals > 0 ? Math.round((allDealsValue[0]?.total || 0) / totalDeals) : 0;
 
-    // Fix win rate calculation: should be wonDeals / (wonDeals + lostDeals)
+    // Fix win rate calculation: should be wonDeals / (wonDeals + lostDeals) * 100
     const totalClosedDeals = wonDeals + lostDeals;
     const winRate = totalClosedDeals > 0 ? Math.round((wonDeals / totalClosedDeals) * 100) : 0;
 
-    console.log('📊 Win rate calculation:', {
-      wonDeals,
-      lostDeals,
-      totalClosedDeals,
-      winRate,
-      calculation: `${wonDeals} / ${totalClosedDeals} * 100 = ${winRate}%`
-    });
-
-    console.log('📊 Average deal calculation:', {
-      totalDeals,
-      totalValue: allDealsValue[0]?.total || 0,
-      averageDealValue,
-      calculation: `${allDealsValue[0]?.total || 0} / ${totalDeals} = ${averageDealValue}`
-    });
+    console.log('📊 Metrics calculations:');
+    console.log(`  - Total deals: ${totalDeals}`);
+    console.log(`  - Active deals: ${activeDeals}`);
+    console.log(`  - Active pipeline value: $${activePipelineValue}`);
+    console.log(`  - Won deals: ${wonDeals}, Lost deals: ${lostDeals}`);
+    console.log(`  - Win rate: ${wonDeals} / ${totalClosedDeals} * 100 = ${winRate}%`);
+    console.log(`  - Average deal: $${allDealsValue[0]?.total || 0} / ${totalDeals} = $${averageDealValue}`);
 
     logger.info(`Retrieved pipeline overview for user ${userId}`, {
       userId,
@@ -621,13 +617,13 @@ const getPipelineOverview = async (req, res) => {
       success: true,
       data: {
         summary: {
-          totalDeals,
+          totalDeals: activeDeals, // Show active deals as "total deals" in pipeline view
           activeDeals,
           closedDeals,
           wonDeals,
           lostDeals,
           overdueDeals,
-          totalValue: activePipelineValue,
+          totalValue: activePipelineValue, // Only active pipeline value
           totalWeightedValue,
           winRate,
           averageDealValue

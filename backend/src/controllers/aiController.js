@@ -1,5 +1,6 @@
 const AIService = require('../services/aiService');
 const RAGIndexingService = require('../services/ragIndexingService');
+const ContentFilter = require('../utils/contentFilter');
 const Deal = require('../models/Deal');
 const Contact = require('../models/Contact');
 const Objection = require('../models/Objection');
@@ -13,12 +14,15 @@ const AILog = require('../models/AILog');
  * - Objection Handler: Smart objection responses
  * - Persona Builder: Customer personality analysis
  * - Win/Loss Explainer: Deal outcome analysis
+ * 
+ * Enhanced with comprehensive content filtering and safety measures
  */
 class AIController {
   constructor() {
     try {
       this.aiService = new AIService();
       this.ragService = new RAGIndexingService();
+      this.contentFilter = new ContentFilter();
       this.initialized = false;
     } catch (error) {
       console.error('❌ AI Controller creation failed:', error);
@@ -160,13 +164,47 @@ class AIController {
       const { objectionText, dealId, category, severity } = req.body;
       const userId = req.user.id;
 
-      // Validate input
-      if (!objectionText || objectionText.length > 1000) {
+      // Enhanced input validation with content filtering
+      if (!objectionText || typeof objectionText !== 'string') {
         return res.status(400).json({
           success: false,
-          message: 'Objection text is required and must be under 1000 characters'
+          message: 'Objection text is required and must be a string'
         });
       }
+
+      if (objectionText.length > 1000) {
+        return res.status(400).json({
+          success: false,
+          message: 'Objection text must be under 1000 characters'
+        });
+      }
+
+      // CONTENT FILTERING - Critical security check
+      console.log(`🔍 Filtering objection content for user ${userId}`);
+      const filterResult = await this.contentFilter.filterContent(objectionText, 'objection_handler');
+      
+      // Log filtering event for monitoring
+      await this.contentFilter.logFilteringEvent(userId, objectionText, filterResult, 'objection_handler');
+
+      if (!filterResult.isAllowed) {
+        console.log(`🚫 Content rejected for user ${userId}: ${filterResult.reason} (${filterResult.severity})`);
+        
+        // Return safe fallback response instead of processing inappropriate content
+        const safeFallback = this.contentFilter.getSafeFallbackResponse('objection_handler', filterResult.reason);
+        
+        return res.status(400).json({
+          success: false,
+          message: 'Your input contains inappropriate content. Please rephrase professionally.',
+          contentViolation: {
+            reason: filterResult.reason,
+            severity: filterResult.severity,
+            guidance: 'Please ensure your objection is business-appropriate and professional.'
+          },
+          fallbackResponse: safeFallback.data
+        });
+      }
+
+      console.log(`✅ Content approved for user ${userId}`);
 
       // Get deal context if provided
       let deal = null;
@@ -195,7 +233,7 @@ class AIController {
         searchMetadata
       );
 
-      // Generate AI response
+      // Generate AI response with enhanced system prompt
       const systemPrompt = this.createObjectionHandlerSystemPrompt();
       const userPrompt = this.createObjectionHandlerUserPrompt(
         objectionText,
@@ -225,6 +263,10 @@ class AIController {
         data: {
           response,
           confidence: aiResponse.confidence,
+          contentSafety: {
+            status: 'approved',
+            checks: 'Content passed all safety filters'
+          },
           ragContext: similarObjections.map(obj => ({
             id: obj.id,
             similarity: obj.similarity,
@@ -275,6 +317,19 @@ class AIController {
         });
       }
 
+      // CONTENT FILTERING for contact data
+      const contactDataString = `${contact.notes || ''} ${contact.description || ''}`;
+      if (contactDataString.trim()) {
+        const filterResult = await this.contentFilter.filterContent(contactDataString, 'persona_builder');
+        
+        if (!filterResult.isAllowed) {
+          console.log(`🚫 Contact data rejected for user ${userId}: ${filterResult.reason}`);
+          
+          const safeFallback = this.contentFilter.getSafeFallbackResponse('persona_builder', filterResult.reason);
+          return res.status(400).json(safeFallback);
+        }
+      }
+
       // Get interactions and deals separately
       const Interaction = require('../models/Interaction');
       const interactions = await Interaction.find({ contactId: contactId }).lean();
@@ -319,6 +374,10 @@ class AIController {
         data: {
           persona,
           confidence: aiResponse.confidence,
+          contentSafety: {
+            status: 'approved',
+            checks: 'Contact data passed safety filters'
+          },
           ragContext: similarInteractions.map(int => ({
             id: int.id,
             similarity: int.similarity,
@@ -865,7 +924,13 @@ Provide specific, actionable coaching suggestions to advance this deal.`;
   }
 
   createObjectionHandlerSystemPrompt() {
-    return `You are an expert sales objection handler. Your role is to provide thoughtful, persuasive responses to customer objections.
+    return `You are an expert sales objection handler. Your role is to provide thoughtful, persuasive responses to LEGITIMATE BUSINESS objections only.
+
+IMPORTANT SAFETY GUIDELINES:
+- Only respond to professional, business-related objections
+- Do not engage with inappropriate, abusive, or non-business content
+- Maintain a professional, respectful tone at all times
+- If content seems inappropriate, request clarification professionally
 
 Guidelines:
 - Acknowledge the concern genuinely
@@ -874,6 +939,7 @@ Guidelines:
 - Include emotional and social proof elements when relevant
 - Keep responses conversational and professional
 - Suggest follow-up questions to understand the objection better
+- Focus on solving business problems, not personal issues
 
 Format your response as JSON:
 {
@@ -881,7 +947,9 @@ Format your response as JSON:
   "approach": "logical|emotional|social_proof",
   "followUp": "suggested follow-up question",
   "tips": ["tip1", "tip2"]
-}`;
+}
+
+Remember: Only respond to legitimate business objections. For any inappropriate content, suggest professional rephrasing.`;
   }
 
   createObjectionHandlerUserPrompt(objectionText, deal, similarObjections, category, severity) {

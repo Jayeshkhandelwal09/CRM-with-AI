@@ -8,7 +8,7 @@ require('dotenv').config();
  * Requires a running backend server and valid OpenAI API key
  */
 
-const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL = 'http://localhost:5000/api';
 let authToken = null;
 
 // Test user credentials (you may need to adjust these)
@@ -25,7 +25,10 @@ async function makeRequest(method, endpoint, data = null) {
     const config = {
       method,
       url: `${BASE_URL}${endpoint}`,
-      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+      },
     };
 
     if (data) {
@@ -272,26 +275,25 @@ async function testAIAnalytics() {
 async function testAIFeedback() {
   console.log('\n📝 Testing AI Feedback endpoint...');
   
-  // This test requires an existing AI log entry
-  // For now, we'll just test the validation
-  const invalidFeedback = {
-    aiLogId: '507f1f77bcf86cd799439011', // Fake ObjectId
-    rating: 'thumbs_up'
+  // Test with valid feedback data
+  const validFeedback = {
+    feature: 'objection_handler',
+    feedback: 'positive',
+    responseId: 'test-response-123',
+    rating: 5,
+    comments: 'This AI response was very helpful'
   };
   
-  const result = await makeRequest('POST', '/ai/feedback', invalidFeedback);
+  const result = await makeRequest('POST', '/ai/feedback', validFeedback);
   
-  if (result.status === 404) {
-    console.log('✅ AI Feedback endpoint working (validation passed)');
-    console.log('ℹ️  Expected 404 for non-existent AI log ID');
-  } else if (result.success) {
+  if (result.success) {
     console.log('✅ AI Feedback endpoint working');
     console.log('📝 Feedback recorded:', result.data);
   } else {
     console.log('❌ AI Feedback failed:', result.error);
   }
   
-  return result.status === 404 || result.success;
+  return result.success;
 }
 
 /**

@@ -1,5 +1,6 @@
 const OpenAI = require('openai');
 const VectorService = require('./vectorService');
+const ContentFilter = require('../utils/contentFilter');
 const AILog = require('../models/AILog');
 const config = require('../config');
 
@@ -13,6 +14,7 @@ const config = require('../config');
  * - Error handling and logging
  * - Cost tracking
  * - Confidence scoring
+ * - Content filtering and safety measures
  */
 class AIService {
   constructor() {
@@ -20,6 +22,7 @@ class AIService {
       apiKey: config.openaiApiKey
     });
     this.vectorService = new VectorService();
+    this.contentFilter = new ContentFilter();
     this.cache = new Map(); // Simple in-memory cache
     this.cacheTimeout = 15 * 60 * 1000; // 15 minutes
     this.isInitialized = false;
@@ -262,6 +265,42 @@ class AIService {
         await this.initialize();
       }
 
+      // CONTENT FILTERING - Additional safety layer at service level
+      if (options.enableContentFiltering !== false) { // Allow disabling for internal/trusted content
+        console.log(`🔍 Service-level content filtering for feature: ${feature}`);
+        
+        // Filter user prompt (the main user input)
+        const filterResult = await this.contentFilter.filterContent(userPrompt, feature);
+        
+        if (!filterResult.isAllowed) {
+          console.log(`🚫 Service-level content rejected for feature ${feature}: ${filterResult.reason}`);
+          
+          // Log the filtering event
+          if (options.userId) {
+            await this.contentFilter.logFilteringEvent(
+              options.userId, 
+              userPrompt, 
+              filterResult, 
+              `service_${feature}`
+            );
+          }
+          
+          // Return safe fallback response
+          return {
+            content: this.contentFilter.getSafeFallbackResponse(feature, filterResult.reason).data,
+            model: 'content_filter',
+            usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+            confidence: 25,
+            timestamp: new Date().toISOString(),
+            filtered: true,
+            filterReason: filterResult.reason,
+            filterSeverity: filterResult.severity
+          };
+        }
+        
+        console.log(`✅ Service-level content approved for feature: ${feature}`);
+      }
+
       // Check rate limit
       if (options.userId && !await this.checkRateLimit(options.userId)) {
         throw new Error('Daily AI request limit exceeded');
@@ -289,7 +328,7 @@ class AIService {
         return cachedResponse;
       }
 
-      // Make OpenAI request
+      // Make OpenAI request with enhanced error handling
       const response = await this.openai.chat.completions.create({
         model: options.model || 'gpt-4',
         messages: [
@@ -303,12 +342,39 @@ class AIService {
         presence_penalty: options.presencePenalty || 0
       });
 
+      // Validate OpenAI response content
+      const responseContent = response.choices[0].message.content;
+      
+      // Optional: Filter AI response as well (for extra safety)
+      if (options.filterResponse && responseContent) {
+        const responseFilterResult = await this.contentFilter.filterContent(
+          responseContent, 
+          `${feature}_response`
+        );
+        
+        if (!responseFilterResult.isAllowed) {
+          console.log(`⚠️ AI response filtered for feature ${feature}`);
+          
+          // Return safe fallback if even the AI response is inappropriate
+          return {
+            content: this.contentFilter.getSafeFallbackResponse(feature, 'ai_response_filtered').data,
+            model: response.model,
+            usage: response.usage,
+            confidence: 25,
+            timestamp: new Date().toISOString(),
+            responseFiltered: true,
+            filterReason: responseFilterResult.reason
+          };
+        }
+      }
+
       const aiResponse = {
-        content: response.choices[0].message.content,
+        content: responseContent,
         model: response.model,
         usage: response.usage,
         confidence: this.calculateConfidence(response, options.ragContext || []),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        filtered: false
       };
 
       // Cache response
@@ -393,15 +459,36 @@ class AIService {
         confidence: 25
       },
       'objection_handler': {
-        content: 'AI response unavailable. Consider acknowledging the concern and asking clarifying questions.',
+        content: JSON.stringify({
+          response: "I understand you have a concern. Could you please provide more details about your specific business objection so I can better assist you?",
+          approach: "clarification",
+          followUp: "What specific aspect of our solution concerns you?",
+          tips: ["Focus on business benefits", "Ask clarifying questions", "Listen actively"]
+        }),
         confidence: 25
       },
       'persona_builder': {
-        content: 'Persona analysis temporarily unavailable. Review interaction history manually.',
+        content: JSON.stringify({
+          communicationStyle: "Unable to analyze due to technical issues",
+          decisionMaking: "Analysis temporarily unavailable",
+          motivations: ["Business growth", "Efficiency"],
+          concerns: ["Budget", "Implementation"],
+          engagementLevel: "medium",
+          preferredApproach: "Professional communication recommended",
+          keyInsights: ["Manual review recommended"]
+        }),
         confidence: 25
       },
       'win_loss_explainer': {
-        content: 'Deal analysis unavailable. Review timeline and objections manually.',
+        content: JSON.stringify({
+          outcome: "unknown",
+          primaryFactors: ["Technical issue prevented analysis"],
+          timeline: "Unable to analyze",
+          objectionHandling: "Manual review required",
+          engagementLevel: "Unknown",
+          keyLessons: ["System temporarily unavailable"],
+          recommendations: ["Review manually", "Try again later"]
+        }),
         confidence: 25
       }
     };

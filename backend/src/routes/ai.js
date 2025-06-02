@@ -84,7 +84,7 @@ router.post('/objections/handle',
       .withMessage('Invalid deal ID'),
     body('category')
       .optional()
-      .isIn(['price', 'product', 'timing', 'authority', 'need', 'trust', 'competition', 'other'])
+      .isIn(['price', 'budget', 'timing', 'authority', 'need', 'trust', 'competitor', 'features', 'support', 'other'])
       .withMessage('Invalid objection category'),
     body('severity')
       .optional()
