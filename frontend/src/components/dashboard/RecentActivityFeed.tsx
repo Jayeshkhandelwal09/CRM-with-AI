@@ -191,34 +191,26 @@ export function RecentActivityFeed({ className = '', limit = 10 }: RecentActivit
         </Link>
       </div>
 
-      <div className="space-y-1">
-        {isLoading ? (
-          Array.from({ length: 5 }).map((_, index) => (
-            <ListItemSkeleton key={index} />
-          ))
-        ) : activities?.length > 0 ? (
-          activities.map((activity) => (
-            <ActivityItem key={activity.id} activity={activity} />
-          ))
-        ) : (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ClockIcon className="w-8 h-8 text-slate-400 dark:text-slate-500" />
+      <div className="max-h-96 overflow-y-auto custom-scrollbar">
+        <div className="space-y-1">
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, index) => (
+              <ListItemSkeleton key={index} />
+            ))
+          ) : activities?.length > 0 ? (
+            activities.map((activity) => (
+              <ActivityItem key={activity.id} activity={activity} />
+            ))
+          ) : (
+            <div className="text-center py-8">
+              <ClockIcon className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+              <h3 className="text-h3 mb-2">No recent activity</h3>
+              <p className="text-body text-slate-600 dark:text-slate-300">
+                Start by creating contacts and deals to see activity here.
+              </p>
             </div>
-            <h3 className="text-h3 mb-2">No recent activity</h3>
-            <p className="text-body text-slate-600 dark:text-slate-300 mb-4">
-              Start by creating contacts or deals to see your activity here.
-            </p>
-            <div className="flex gap-3 justify-center">
-              <Link href="/contacts/new" className="btn-primary">
-                Add Contact
-              </Link>
-              <Link href="/deals/new" className="btn-secondary">
-                Create Deal
-              </Link>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

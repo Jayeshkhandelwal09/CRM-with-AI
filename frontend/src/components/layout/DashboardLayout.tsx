@@ -49,7 +49,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             : 'ml-64'
       }`}>
         {/* Header */}
-        <Header onMenuClick={handleSidebarToggle} />
+        <Header 
+          onMenuClick={handleSidebarToggle} 
+          sidebarCollapsed={sidebarCollapsed || isMobile}
+        />
         {/* Breadcrumbs */}
         <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
           <div className="container-responsive py-3">

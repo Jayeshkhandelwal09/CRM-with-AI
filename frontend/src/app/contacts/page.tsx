@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -28,6 +28,23 @@ interface ContactsFiltersState {
   tags: string;
   sortBy: string;
   sortOrder: 'asc' | 'desc';
+}
+
+// Custom hook for debouncing
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
 }
 
 export default function ContactsPage() {
@@ -66,6 +83,9 @@ function ContactsContent() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
 
+  // Debounce filters to prevent excessive API calls
+  const debouncedFilters = useDebounce(filters, 500);
+
   const fetchContacts = useCallback(async (page: number = 1) => {
     try {
       setIsLoading(true);
@@ -74,17 +94,19 @@ function ContactsContent() {
       const params: Record<string, string | number> = {
         page,
         limit: pagination.limit,
-        sortBy: filters.sortBy,
-        sortOrder: filters.sortOrder
+        sortBy: debouncedFilters.sortBy,
+        sortOrder: debouncedFilters.sortOrder
       };
 
       // Add filters if they have values
-      if (filters.search.trim()) params.search = filters.search.trim();
-      if (filters.company) params.company = filters.company;
-      if (filters.status) params.status = filters.status;
-      if (filters.leadSource) params.leadSource = filters.leadSource;
-      if (filters.priority) params.priority = filters.priority;
-      if (filters.tags) params.tags = filters.tags;
+      if (debouncedFilters.search.trim()) params.search = debouncedFilters.search.trim();
+      if (debouncedFilters.company.trim()) params.company = debouncedFilters.company.trim();
+      if (debouncedFilters.status) params.status = debouncedFilters.status;
+      if (debouncedFilters.leadSource) params.leadSource = debouncedFilters.leadSource;
+      if (debouncedFilters.priority) params.priority = debouncedFilters.priority;
+      if (debouncedFilters.tags.trim()) params.tags = debouncedFilters.tags.trim();
+
+      console.log('🔍 Fetching contacts with params:', params);
 
       const response = await api.getContacts(params);
       
@@ -118,7 +140,7 @@ function ContactsContent() {
     } finally {
       setIsLoading(false);
     }
-  }, [filters, pagination.limit]);
+  }, [debouncedFilters, pagination.limit]);
 
   useEffect(() => {
     fetchContacts(1);

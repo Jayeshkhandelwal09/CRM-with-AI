@@ -13,12 +13,19 @@ import {
   ChevronRightIcon
 } from "@heroicons/react/24/outline";
 
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  badge?: string;
+}
+
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
 }
 
-const navigationItems = [
+const navigationItems: NavigationItem[] = [
   {
     name: "Dashboard",
     href: "/dashboard",
@@ -38,7 +45,6 @@ const navigationItems = [
     name: "Analytics",
     href: "/dashboard/analytics",
     icon: ChartBarIcon,
-    badge: "Soon",
   },
   {
     name: "AI Features",
@@ -63,27 +69,39 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       } hidden lg:block`}>
         <div className="flex flex-col h-full">
           {/* Logo Section */}
-          <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
-            {!collapsed && (
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <span className="text-h3 font-semibold text-slate-800 dark:text-slate-100">CRM AI</span>
+          <div className={`flex items-center p-4 border-b border-slate-200 dark:border-slate-700 ${
+            collapsed ? 'justify-center' : 'justify-between'
+          }`}>
+            {collapsed ? (
+              /* Collapsed state - only show icon and toggle button */
+              <div className="flex  items-center gap-2">
+             
+                <button
+                  onClick={onToggle}
+                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                >
+                  <ChevronRightIcon className="w-6 h-4 text-slate-600 dark:text-slate-300" />
+                </button>
               </div>
+            ) : (
+              /* Expanded state - show full logo and toggle button */
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <span className="text-h3 font-semibold text-slate-800 dark:text-slate-100">CRM AI</span>
+                </div>
+                <button
+                  onClick={onToggle}
+                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                >
+                  <ChevronLeftIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+                </button>
+              </>
             )}
-            <button
-              onClick={onToggle}
-              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-            >
-              {collapsed ? (
-                <ChevronRightIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-              ) : (
-                <ChevronLeftIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-              )}
-            </button>
           </div>
 
           {/* Navigation */}
@@ -100,7 +118,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     isActive
                       ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-700'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-100'
-                  }`}
+                  } ${collapsed ? 'justify-center' : ''}`}
                 >
                   <item.icon className={`w-5 h-5 flex-shrink-0 ${
                     isActive ? 'text-blue-600 dark:text-blue-300' : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200'
@@ -204,6 +222,14 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </div>
         </div>
       </div>
+
+      {/* Mobile Overlay */}
+      {!collapsed && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={onToggle}
+        />
+      )}
     </>
   );
-} 
+}

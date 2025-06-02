@@ -192,20 +192,20 @@ export function ContactsExportModal({ isOpen, onClose, currentFilters }: Contact
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
           <h2 className="text-h2">Export Contacts</h2>
           <button
             onClick={handleClose}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
           >
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+        {/* Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-6">
           <div className="space-y-6">
             {/* Export Options */}
             <div className="space-y-4">
@@ -383,11 +383,12 @@ export function ContactsExportModal({ isOpen, onClose, currentFilters }: Contact
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-slate-200 dark:border-slate-700">
+        {/* Footer - Fixed at bottom */}
+        <div className="flex items-center justify-between p-6 border-t border-slate-200 dark:border-slate-700 flex-shrink-0 bg-white dark:bg-slate-800">
           <button
             onClick={handleClose}
             className="btn-secondary"
+            disabled={isExporting}
           >
             Cancel
           </button>

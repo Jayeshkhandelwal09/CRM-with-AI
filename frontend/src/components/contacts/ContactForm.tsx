@@ -11,7 +11,9 @@ import {
   MapPinIcon,
   TagIcon,
   CalendarIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  HomeIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'sonner';
 
@@ -83,12 +85,55 @@ const initialFormData: ContactFormData = {
   nextFollowUpDate: '',
 };
 
+// Custom Breadcrumb Component for Contact Edit
+function ContactEditBreadcrumb({ contact }: { contact: Contact | null }) {
+  if (!contact) return null;
+
+  return (
+    <nav className="flex items-center space-x-2 text-sm mb-6 px-1">
+      <HomeIcon className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+      
+      <Link
+        href="/dashboard"
+        className="text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 transition-colors"
+      >
+        Dashboard
+      </Link>
+      
+      <ChevronRightIcon className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+      
+      <Link
+        href="/contacts"
+        className="text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 transition-colors"
+      >
+        Contacts
+      </Link>
+      
+      <ChevronRightIcon className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+      
+      <Link
+        href={`/contacts/${contact.id || contact._id}`}
+        className="text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 transition-colors"
+      >
+        {contact.firstName} {contact.lastName}
+      </Link>
+      
+      <ChevronRightIcon className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+      
+      <span className="text-slate-800 dark:text-slate-100 font-medium">
+        Edit
+      </span>
+    </nav>
+  );
+}
+
 export function ContactForm({ mode }: ContactFormProps) {
   const router = useRouter();
   const params = useParams();
   const contactId = mode === 'edit' ? params.id as string : null;
 
   const [formData, setFormData] = useState<ContactFormData>(initialFormData);
+  const [contact, setContact] = useState<Contact | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -139,6 +184,7 @@ export function ContactForm({ mode }: ContactFormProps) {
           },
           nextFollowUpDate: mappedContact.nextFollowUpDate ? mappedContact.nextFollowUpDate.split('T')[0] : '',
         });
+        setContact(contact);
       } else {
         throw new Error(response.error || 'Failed to fetch contact');
       }
@@ -477,6 +523,11 @@ export function ContactForm({ mode }: ContactFormProps) {
 
   return (
     <div className="space-y-6">
+      {/* Custom Breadcrumb for Edit Mode */}
+      {mode === 'edit' && contact && (
+        <ContactEditBreadcrumb contact={contact} />
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">

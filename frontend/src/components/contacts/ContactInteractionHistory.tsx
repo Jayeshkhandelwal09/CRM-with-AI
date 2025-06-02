@@ -47,22 +47,16 @@ export function ContactInteractionHistory({ contactId, contactName, isOpen, onCl
       const params = {
         page,
         limit,
-        contactId,
         ...newFilters
       };
 
-      const response = await api.getUserActivity(params);
+      const response = await api.getContactInteractions(contactId, params);
       
       if (response.success) {
-        // Filter interactions to only show those related to this contact
-        const contactInteractions = response.data.data?.filter(
-          activity => activity.contactId?.id === contactId
-        ) || [];
-        
-        setInteractions(contactInteractions);
+        setInteractions(response.data.data || []);
         setCurrentPage(response.data.pagination.currentPage);
         setTotalPages(response.data.pagination.totalPages);
-        setTotalInteractions(contactInteractions.length);
+        setTotalInteractions(response.data.pagination.totalInteractions || 0);
       } else {
         throw new Error(response.error || 'Failed to fetch interactions');
       }
@@ -291,11 +285,42 @@ export function ContactInteractionHistory({ contactId, contactName, isOpen, onCl
                           
                           <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
                             {formatDateTime(interaction.date)}
+                            {interaction.duration && (
+                              <span className="ml-2 text-xs text-slate-500">
+                                • {interaction.duration} min
+                              </span>
+                            )}
                           </p>
                           
-                          {/* Additional interaction details would go here */}
-                          <div className="text-sm text-slate-700 dark:text-slate-300">
-                            <p>Interaction details would be displayed here based on the interaction type and content.</p>
+                          {/* Interaction details */}
+                          <div className="text-sm text-slate-700 dark:text-slate-300 space-y-2">
+                            {interaction.notes && (
+                              <p>{interaction.notes}</p>
+                            )}
+                            
+                            {interaction.outcome && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Outcome:</span>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  interaction.outcome === 'successful' 
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                                    : interaction.outcome === 'failed'
+                                    ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
+                                    : 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200'
+                                }`}>
+                                  {interaction.outcome.charAt(0).toUpperCase() + interaction.outcome.slice(1)}
+                                </span>
+                              </div>
+                            )}
+                            
+                            {interaction.dealId && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Related Deal:</span>
+                                <span className="text-xs text-blue-600 dark:text-blue-400">
+                                  {interaction.dealId.title} (${interaction.dealId.value?.toLocaleString()})
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>

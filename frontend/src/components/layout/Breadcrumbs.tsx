@@ -23,6 +23,16 @@ const pathLabels: Record<string, string> = {
 export function Breadcrumbs() {
   const pathname = usePathname();
 
+  // Don't show breadcrumbs for contact detail pages (they have custom breadcrumbs)
+  if (pathname.match(/^\/contacts\/[^\/]+$/)) {
+    return null;
+  }
+
+  // Don't show breadcrumbs for contact edit pages (they have custom breadcrumbs)
+  if (pathname.match(/^\/contacts\/[^\/]+\/edit$/)) {
+    return null;
+  }
+
   const generateBreadcrumbs = (): BreadcrumbItem[] => {
     const pathSegments = pathname.split("/").filter(Boolean);
     const breadcrumbs: BreadcrumbItem[] = [];

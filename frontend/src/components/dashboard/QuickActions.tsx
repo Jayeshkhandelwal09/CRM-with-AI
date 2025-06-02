@@ -68,7 +68,7 @@ function QuickAction({ title, description, icon, href, color, badge }: QuickActi
 }
 
 export function QuickActions({ className = '' }: QuickActionsProps) {
-  const actions = [
+  const actions: QuickActionProps[] = [
     {
       title: 'Add New Contact',
       description: 'Create a new contact and start building relationships',
@@ -80,7 +80,7 @@ export function QuickActions({ className = '' }: QuickActionsProps) {
       title: 'Create Deal',
       description: 'Start tracking a new sales opportunity',
       icon: <CurrencyDollarIcon className="w-6 h-6" />,
-      href: '/deals/new',
+      href: '/dashboard/deals/new',
       color: 'green' as const,
     },
     {
@@ -101,17 +101,15 @@ export function QuickActions({ className = '' }: QuickActionsProps) {
       title: 'View Analytics',
       description: 'Analyze your sales performance and trends',
       icon: <ChartBarIcon className="w-6 h-6" />,
-      href: '/analytics',
+      href: '/dashboard/analytics',
       color: 'indigo' as const,
-      badge: 'Soon',
     },
     {
       title: 'AI Assistant',
       description: 'Get AI-powered insights and recommendations',
       icon: <SparklesIcon className="w-6 h-6" />,
-      href: '/ai',
+      href: '/dashboard/ai',
       color: 'pink' as const,
-      badge: 'Soon',
     },
   ];
 

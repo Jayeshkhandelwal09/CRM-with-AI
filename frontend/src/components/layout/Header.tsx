@@ -8,9 +8,10 @@ import { GlobalSearch } from '@/components/dashboard/GlobalSearch';
 
 interface HeaderProps {
   onMenuClick: () => void;
+  sidebarCollapsed: boolean;
 }
 
-export function Header({ onMenuClick }: HeaderProps) {
+export function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
@@ -27,9 +28,9 @@ export function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 lg:px-6">
-      {/* Left side - Mobile menu button + Logo */}
-      <div className="flex items-center gap-4">
+    <header className="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 flex items-center px-4 lg:px-6">
+      {/* Left side - Mobile menu button + Logo (only when sidebar collapsed) + Search */}
+      <div className="flex items-center gap-4 flex-1">
         <button
           onClick={onMenuClick}
           className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -38,19 +39,26 @@ export function Header({ onMenuClick }: HeaderProps) {
           <Bars3Icon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
         </button>
         
-        <div className="hidden lg:flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
+        {/* Show CRM AI logo only when sidebar is collapsed on desktop */}
+        {sidebarCollapsed && (
+          <div className="hidden lg:flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <span className="text-h3 font-semibold text-slate-800 dark:text-slate-100">CRM AI</span>
           </div>
-          <span className="text-h3 font-semibold text-slate-800 dark:text-slate-100">CRM AI</span>
-        </div>
-      </div>
+        )}
 
-      {/* Center - Global Search */}
-      <div className="flex-1 max-w-md mx-4">
-        <GlobalSearch />
+        {/* Global Search - positioned based on sidebar state */}
+        <div className={`w-1/2 transition-all duration-300 ${
+          sidebarCollapsed 
+            ? 'ml-4' // When collapsed, add margin from logo
+            : 'ml-0' // When expanded, start from left edge
+        }`}>
+          <GlobalSearch />
+        </div>
       </div>
 
       {/* Right side - Theme toggle + User menu */}

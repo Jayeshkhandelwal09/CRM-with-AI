@@ -158,12 +158,11 @@ function DashboardContent() {
             <div>
               <h3 className="text-h3 mb-2">AI Features</h3>
               <p className="text-body text-slate-600 dark:text-slate-300 mb-3">
-                Unlock powerful AI capabilities to boost your sales performance.
+                Unlock powerful AI capabilities including Deal Coach, Objection Handler, and Customer Persona Builder.
               </p>
-              <span className="inline-flex items-center gap-1 text-sm text-orange-600 dark:text-orange-400 font-medium">
-                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                Coming Soon
-              </span>
+              <a href="/dashboard/ai" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium transition-colors">
+                Explore AI Features →
+              </a>
             </div>
             </div>
             </div>

@@ -10,6 +10,7 @@ import {
   SparklesIcon
 } from '@heroicons/react/24/outline';
 import { api, formatCurrency, type PipelineOverview, type UserStats } from '@/lib/api';
+import { aiService, type AIAnalytics } from '@/services/aiService';
 import { MetricsCardSkeleton } from '@/components/ui/LoadingSkeleton';
 
 interface MetricsCardsProps {
@@ -78,24 +79,29 @@ function MetricCard({ title, value, subtitle, icon, trend, color, isLoading }: M
 
 export function MetricsCards({ userStats, className = '' }: MetricsCardsProps) {
   const [pipelineData, setPipelineData] = useState<PipelineOverview | null>(null);
+  const [aiAnalytics, setAiAnalytics] = useState<AIAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchPipelineData = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await api.getPipelineOverview();
-        setPipelineData(response.data);
+        const [pipelineResponse, aiAnalyticsResponse] = await Promise.all([
+          api.getPipelineOverview(),
+          aiService.getAnalytics('1d') // Get today's AI usage
+        ]);
+        setPipelineData(pipelineResponse.data);
+        setAiAnalytics(aiAnalyticsResponse);
       } catch (err) {
-        console.error('Failed to fetch pipeline data:', err);
+        console.error('Failed to fetch dashboard data:', err);
         setError(err instanceof Error ? err.message : 'Failed to load metrics');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchPipelineData();
+    fetchData();
   }, []);
 
   if (error) {
@@ -178,7 +184,7 @@ export function MetricsCards({ userStats, className = '' }: MetricsCardsProps) {
             <div>
               <h3 className="text-h3 mb-1">AI Assistant Usage</h3>
               <p className="text-body text-slate-600 dark:text-slate-300">
-                {userStats?.aiRequestsToday || 0} requests used today • {userStats?.aiRequestsRemaining || 100} remaining
+                {aiAnalytics?.todaysUsage || 0} requests used today • {aiAnalytics?.remainingRequests || 500} remaining
               </p>
             </div>
           </div>
@@ -186,7 +192,7 @@ export function MetricsCards({ userStats, className = '' }: MetricsCardsProps) {
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">
-                {userStats?.aiRequestsToday || 0}/100
+                {aiAnalytics?.todaysUsage || 0}/500
               </p>
               <p className="text-caption text-slate-500 dark:text-slate-400">Daily limit</p>
             </div>
@@ -196,7 +202,7 @@ export function MetricsCards({ userStats, className = '' }: MetricsCardsProps) {
               <div 
                 className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-500"
                 style={{ 
-                  width: `${Math.min(((userStats?.aiRequestsToday || 0) / 100) * 100, 100)}%` 
+                  width: `${Math.min(((aiAnalytics?.todaysUsage || 0) / 500) * 100, 100)}%` 
                 }}
               />
             </div>

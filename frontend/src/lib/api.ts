@@ -139,10 +139,12 @@ export interface PipelineOverview {
     activeDeals: number;
     closedDeals: number;
     wonDeals: number;
+    lostDeals: number;
     overdueDeals: number;
     totalValue: number;
     totalWeightedValue: number;
     winRate: number;
+    averageDealValue: number;
   };
   pipelineStages: Array<{
     stage: string;
@@ -157,6 +159,9 @@ export interface Activity {
   subject: string;
   type: string;
   date: string;
+  notes?: string;
+  duration?: number;
+  outcome?: string;
   dealId?: {
     id: string;
     title: string;
@@ -186,6 +191,7 @@ export interface PaginatedResponse<T> {
     totalPages: number;
     totalContacts?: number;
     totalDeals?: number;
+    totalInteractions?: number;
     hasNextPage: boolean;
     hasPrevPage: boolean;
     limit: number;
@@ -531,6 +537,9 @@ export const api = {
     limit?: number;
     search?: string;
     company?: string;
+    status?: string;
+    leadSource?: string;
+    priority?: string;
     tags?: string;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
@@ -540,6 +549,9 @@ export const api = {
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.search) queryParams.append('search', params.search);
     if (params?.company) queryParams.append('company', params.company);
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.leadSource) queryParams.append('leadSource', params.leadSource);
+    if (params?.priority) queryParams.append('priority', params.priority);
     if (params?.tags) queryParams.append('tags', params.tags);
     if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
     if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
@@ -562,6 +574,25 @@ export const api = {
 
   async deleteContact(id: string): Promise<ApiResponse<void>> {
     return apiClient.delete(`/contacts/${id}`);
+  },
+
+  async getContactInteractions(contactId: string, params?: {
+    page?: number;
+    limit?: number;
+    type?: string;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<ApiResponse<PaginatedResponse<Activity>>> {
+    const searchParams = new URLSearchParams();
+    
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.type) searchParams.append('type', params.type);
+    if (params?.startDate) searchParams.append('startDate', params.startDate);
+    if (params?.endDate) searchParams.append('endDate', params.endDate);
+    
+    const queryString = searchParams.toString();
+    return apiClient.get(`/contacts/${contactId}/interactions${queryString ? `?${queryString}` : ''}`);
   },
 
   // Search
@@ -690,36 +721,37 @@ export const getStageColor = (stage: string): string => {
 
 export const getPriorityColor = (priority: string): string => {
   const colors = {
-    low: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300',
-    medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
-    high: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
+    low: 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600',
+    medium: 'bg-amber-200 text-amber-900 dark:bg-amber-800 dark:text-amber-100 border border-amber-300 dark:border-amber-700',
+    high: 'bg-red-200 text-red-900 dark:bg-red-800 dark:text-red-100 border border-red-300 dark:border-red-700',
+    urgent: 'bg-red-300 text-red-900 dark:bg-red-700 dark:text-red-100 border border-red-400 dark:border-red-600',
   };
   return colors[priority as keyof typeof colors] || colors.medium;
 };
 
 export const getContactStatusColor = (status: string): string => {
   const colors = {
-    lead: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-    prospect: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
-    customer: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-    active: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-    inactive: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300',
+    lead: 'bg-blue-200 text-blue-900 dark:bg-blue-800 dark:text-blue-100 border border-blue-300 dark:border-blue-700',
+    prospect: 'bg-purple-200 text-purple-900 dark:bg-purple-800 dark:text-purple-100 border border-purple-300 dark:border-purple-700',
+    customer: 'bg-green-200 text-green-900 dark:bg-green-800 dark:text-green-100 border border-green-300 dark:border-green-700',
+    active: 'bg-emerald-200 text-emerald-900 dark:bg-emerald-800 dark:text-emerald-100 border border-emerald-300 dark:border-emerald-700',
+    inactive: 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100 border border-gray-300 dark:border-gray-600',
   };
   return colors[status as keyof typeof colors] || colors.lead;
 };
 
 export const getLeadSourceColor = (source: string): string => {
   const colors = {
-    website: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-    referral: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-    social_media: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
-    email: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300',
-    email_campaign: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300',
-    phone: 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300',
-    cold_call: 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300',
-    event: 'bg-pink-100 text-pink-800 dark:bg-pink-900/50 dark:text-pink-300',
-    advertisement: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
-    other: 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300',
+    website: 'bg-blue-200 text-blue-900 dark:bg-blue-800 dark:text-blue-100 border border-blue-300 dark:border-blue-700',
+    referral: 'bg-green-200 text-green-900 dark:bg-green-800 dark:text-green-100 border border-green-300 dark:border-green-700',
+    social_media: 'bg-purple-200 text-purple-900 dark:bg-purple-800 dark:text-purple-100 border border-purple-300 dark:border-purple-700',
+    email: 'bg-indigo-200 text-indigo-900 dark:bg-indigo-800 dark:text-indigo-100 border border-indigo-300 dark:border-indigo-700',
+    email_campaign: 'bg-indigo-200 text-indigo-900 dark:bg-indigo-800 dark:text-indigo-100 border border-indigo-300 dark:border-indigo-700',
+    phone: 'bg-orange-200 text-orange-900 dark:bg-orange-800 dark:text-orange-100 border border-orange-300 dark:border-orange-700',
+    cold_call: 'bg-orange-200 text-orange-900 dark:bg-orange-800 dark:text-orange-100 border border-orange-300 dark:border-orange-700',
+    event: 'bg-pink-200 text-pink-900 dark:bg-pink-800 dark:text-pink-100 border border-pink-300 dark:border-pink-700',
+    advertisement: 'bg-red-200 text-red-900 dark:bg-red-800 dark:text-red-100 border border-red-300 dark:border-red-700',
+    other: 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100 border border-gray-300 dark:border-gray-600',
   };
   return colors[source as keyof typeof colors] || colors.other;
 }; 
