@@ -371,6 +371,7 @@ const updateDealStage = async (req, res) => {
     // Handle closed deals
     if (stage === 'closed_won' || stage === 'closed_lost') {
       updateData.isClosed = true;
+      updateData.isActive = false;
       updateData.isWon = stage === 'closed_won';
       updateData.actualCloseDate = new Date();
       updateData.probability = stage === 'closed_won' ? 100 : 0;
@@ -385,6 +386,7 @@ const updateDealStage = async (req, res) => {
     } else {
       // Reopening a deal
       updateData.isClosed = false;
+      updateData.isActive = true;
       updateData.isWon = false;
       updateData.actualCloseDate = null;
       
