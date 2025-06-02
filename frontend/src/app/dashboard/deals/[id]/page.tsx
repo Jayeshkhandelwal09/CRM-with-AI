@@ -21,6 +21,7 @@ import { Deal } from '@/types';
 import { api } from '@/lib/api';
 import { Skeleton } from '@/components/ui/LoadingSkeleton';
 import { toast } from 'sonner';
+import { DealCoach, WinLossExplainer, ObjectionHandler } from '@/components/ai';
 
 export default function DealDetailPage() {
   return (
@@ -282,10 +283,33 @@ function DealDetailContent() {
               </p>
             </div>
           )}
+
+          {/* Win/Loss Explainer for closed deals */}
+          {(deal.stage === 'closed_won' || deal.stage === 'closed_lost') && (
+            <WinLossExplainer 
+              dealId={dealId}
+              dealOutcome={deal.stage}
+              dealValue={deal.value}
+              className="glass-card"
+            />
+          )}
+
+          {/* Objection Handler */}
+          <ObjectionHandler 
+            dealId={dealId}
+            className="glass-card"
+          />
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* AI Deal Coach */}
+          <DealCoach 
+            dealId={dealId}
+            dealStage={deal.stage}
+            dealValue={deal.value}
+          />
+
           {/* Contact Information */}
           {deal.contact && (
             <div className="glass-card">

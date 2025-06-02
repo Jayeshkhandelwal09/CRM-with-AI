@@ -606,6 +606,45 @@ export const api = {
   async getImportStats(): Promise<ApiResponse<Record<string, unknown>>> {
     return apiClient.getImportStats();
   },
+
+  // AI Services
+  async getDealCoach(dealId: string): Promise<ApiResponse<any>> {
+    return apiClient.get(`/ai/deals/${dealId}/coach`);
+  },
+
+  async handleObjection(objectionData: {
+    objectionText: string;
+    dealId?: string;
+    category?: 'price' | 'product' | 'timing' | 'authority' | 'need' | 'trust' | 'competition' | 'other';
+    severity?: 'low' | 'medium' | 'high' | 'critical';
+  }): Promise<ApiResponse<any>> {
+    return apiClient.post('/ai/objections/handle', objectionData);
+  },
+
+  async getCustomerPersona(contactId: string): Promise<ApiResponse<any>> {
+    return apiClient.get(`/ai/contacts/${contactId}/persona`);
+  },
+
+  async explainWinLoss(dealId: string): Promise<ApiResponse<any>> {
+    return apiClient.get(`/ai/deals/${dealId}/explain`);
+  },
+
+  async submitAIFeedback(feedbackData: {
+    aiLogId: string;
+    rating: 'thumbs_up' | 'thumbs_down';
+    comment?: string;
+    wasUseful?: boolean;
+  }): Promise<ApiResponse<any>> {
+    return apiClient.post('/ai/feedback', feedbackData);
+  },
+
+  async getAIAnalytics(period: '1d' | '7d' | '30d' = '7d'): Promise<ApiResponse<any>> {
+    return apiClient.get(`/ai/analytics?period=${period}`);
+  },
+
+  async getAIHealthStatus(): Promise<ApiResponse<any>> {
+    return apiClient.get('/ai/health');
+  },
 };
 
 // Utility functions

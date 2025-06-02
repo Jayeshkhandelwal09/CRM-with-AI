@@ -44,7 +44,6 @@ const navigationItems = [
     name: "AI Features",
     href: "/dashboard/ai",
     icon: SparklesIcon,
-    badge: "Soon",
   },
   {
     name: "Profile",

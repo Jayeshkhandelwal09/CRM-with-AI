@@ -30,6 +30,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { toast } from 'sonner';
 import { ContactInteractionHistory } from '@/components/contacts/ContactInteractionHistory';
+import { CustomerPersona } from '@/components/ai';
 
 export default function ContactDetailPage() {
   return (
@@ -355,6 +356,13 @@ function ContactDetailContent() {
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* AI Customer Persona */}
+            <CustomerPersona 
+              contactId={contact.id || contact._id || ''}
+              contactName={`${contact.firstName} ${contact.lastName}`}
+              company={contact.company}
+            />
+
             {/* Status & Priority */}
             <div className="glass-card">
               <h2 className="text-h2 mb-4">Status & Priority</h2>
