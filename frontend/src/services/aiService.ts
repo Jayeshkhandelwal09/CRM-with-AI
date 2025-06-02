@@ -98,22 +98,15 @@ export interface WinLossExplainerResponse {
 export interface AIAnalytics {
   period: string;
   totalRequests: number;
-  todayUsage: number;
+  todaysUsage: number;
   remainingRequests: number;
-  requestsByFeature: Record<string, {
-    count: number;
-    avgResponseTime: number;
-    successRate: number;
-  }>;
-  feedbackStats: {
-    thumbsUp: number;
-    thumbsDown: number;
+  positiveFeedback: number;
+  avgResponseTime: number;
+  featureUsage: Record<string, number>;
+  dateRange: {
+    start: string;
+    end: string;
   };
-  dailyUsage: Array<{
-    date: string;
-    count: number;
-  }>;
-  timestamp: string;
 }
 
 export interface AIHealthStatus {
@@ -205,13 +198,15 @@ class AIService {
    * Submit feedback on AI responses
    */
   async submitFeedback(feedbackData: {
-    aiLogId: string;
-    rating: 'thumbs_up' | 'thumbs_down';
-    comment?: string;
-    wasUseful?: boolean;
+    feature: 'deal_coach' | 'objection_handler' | 'persona_builder' | 'win_loss_explainer';
+    feedback: 'positive' | 'negative';
+    responseId?: string;
+    rating?: number;
+    comments?: string;
   }): Promise<void> {
     try {
-      await api.submitAIFeedback(feedbackData);
+      const response = await api.submitAIFeedback(feedbackData);
+      return response.data;
     } catch (error: any) {
       console.error('AI Feedback API error:', error);
       throw new Error(error.response?.data?.message || 'Failed to submit feedback');

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/LoadingSkeleton';
@@ -9,14 +8,14 @@ import {
   User, 
   RefreshCw, 
   MessageCircle, 
-  Brain,
+  Target, 
   AlertTriangle,
+  CheckCircle,
   ThumbsUp,
   ThumbsDown,
-  Target,
   TrendingUp,
-  Clock,
-  Lightbulb
+  Heart,
+  AlertCircle
 } from 'lucide-react';
 import { aiService, PersonaBuilderResponse, type CustomerPersona } from '@/services/aiService';
 
@@ -58,244 +57,237 @@ export function CustomerPersona({ contactId, contactName, company, className }: 
   const getEngagementColor = (level: string) => {
     switch (level) {
       case 'high':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800';
       case 'medium':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800';
       case 'low':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900/20 dark:text-slate-300 dark:border-slate-800';
     }
   };
 
   const getEngagementIcon = (level: string) => {
     switch (level) {
       case 'high':
-        return <TrendingUp className="h-4 w-4 text-green-600" />;
+        return <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />;
       case 'medium':
-        return <Clock className="h-4 w-4 text-yellow-600" />;
+        return <Target className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />;
       case 'low':
-        return <AlertTriangle className="h-4 w-4 text-red-600" />;
+        return <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />;
       default:
-        return <Target className="h-4 w-4 text-gray-600" />;
+        return <User className="w-4 h-4 text-slate-600 dark:text-slate-400" />;
     }
   };
 
-  const handleFeedback = async (rating: 'thumbs_up' | 'thumbs_down') => {
+  const handleFeedback = async (feedback: 'positive' | 'negative') => {
     if (!persona) return;
     
     try {
-      console.log(`Feedback submitted: ${rating}`);
+      await aiService.submitFeedback({
+        feature: 'persona_builder',
+        feedback,
+        responseId: contactId
+      });
+      console.log(`Feedback submitted: ${feedback}`);
     } catch (err) {
       console.error('Failed to submit feedback:', err);
     }
   };
 
   return (
-    <Card className={className}>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <User className="h-5 w-5 text-blue-600" />
-          Customer Persona
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={fetchPersona}
-            disabled={loading}
-            className="ml-auto"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          </Button>
-        </CardTitle>
-        {lastUpdated && (
-          <p className="text-xs text-muted-foreground">
-            Last updated: {lastUpdated.toLocaleTimeString()}
-          </p>
-        )}
-      </CardHeader>
+    <div className={`glass-card ${className}`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <h3 className="text-h3">Customer Persona</h3>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={fetchPersona}
+          disabled={loading}
+          className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+        </Button>
+      </div>
 
-      <CardContent className="space-y-4">
-        {loading && (
-          <div className="space-y-3">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
+      {lastUpdated && (
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+          Last updated: {lastUpdated.toLocaleTimeString()}
+        </p>
+      )}
+
+      {loading && (
+        <div className="space-y-3">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+        </div>
+      )}
+
+      {error && (
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+            <span className="text-sm font-medium text-red-800 dark:text-red-300">Error</span>
           </div>
-        )}
+          <p className="text-sm text-red-700 dark:text-red-400 mt-1">{error}</p>
+        </div>
+      )}
 
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+      {persona && !loading && !error && (
+        <>
+          {/* Confidence Score */}
+          <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg mb-4">
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">AI Confidence</span>
+            <Badge className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700">
+              {typeof persona.confidence === 'number' ? persona.confidence : 85}%
+            </Badge>
+          </div>
+
+          {/* Engagement Level */}
+          <div className="mb-4">
+            <h4 className="text-label text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">
+              Engagement Level
+            </h4>
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-red-600" />
-              <span className="text-sm font-medium text-red-800">Error</span>
-            </div>
-            <p className="text-sm text-red-700 mt-1">{error}</p>
-          </div>
-        )}
-
-        {persona && !loading && !error && (
-          <>
-            {/* Confidence Score */}
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <span className="text-sm font-medium">AI Confidence</span>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                {Math.round(persona.confidence * 100)}%
+              {getEngagementIcon(persona.persona.engagementLevel)}
+              <Badge className={getEngagementColor(persona.persona.engagementLevel)}>
+                {persona.persona.engagementLevel.toUpperCase()}
               </Badge>
             </div>
-
-            {/* Communication Style */}
-            <div className="space-y-2">
-              <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-                Communication Style
-              </h4>
-              <div className="p-3 border rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <MessageCircle className="h-4 w-4 text-blue-600" />
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                    {persona.persona.communicationStyle || 'Unknown'}
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Decision Making: {persona.persona.decisionMaking || 'Unknown'}
-                </p>
-              </div>
-            </div>
-
-            {/* Engagement Level */}
-            <div className="space-y-2">
-              <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-                Engagement Level
-              </h4>
-              <div className="flex items-center gap-2 p-3 border rounded-lg">
-                {getEngagementIcon(persona.persona.engagementLevel)}
-                <Badge 
-                  variant="outline" 
-                  className={getEngagementColor(persona.persona.engagementLevel)}
-                >
-                  {persona.persona.engagementLevel.toUpperCase()}
-                </Badge>
-              </div>
-            </div>
-
-            {/* Motivations */}
-            {persona.persona.motivations && persona.persona.motivations.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-                  Key Motivations
-                </h4>
-                <div className="space-y-2">
-                  {persona.persona.motivations.map((motivation, index) => (
-                    <div key={index} className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded">
-                      <Target className="h-3 w-3 text-green-600" />
-                      <span className="text-sm text-green-800">{motivation}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Concerns */}
-            {persona.persona.concerns && persona.persona.concerns.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-                  Key Concerns
-                </h4>
-                <div className="space-y-2">
-                  {persona.persona.concerns.map((concern, index) => (
-                    <div key={index} className="flex items-center gap-2 p-2 bg-orange-50 border border-orange-200 rounded">
-                      <AlertTriangle className="h-3 w-3 text-orange-600" />
-                      <span className="text-sm text-orange-800">{concern}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Preferred Approach */}
-            <div className="space-y-2">
-              <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-                Recommended Approach
-              </h4>
-              <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <Lightbulb className="h-4 w-4 text-purple-600 mt-0.5" />
-                  <p className="text-sm text-purple-800 leading-relaxed">
-                    {persona.persona.preferredApproach}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Key Insights */}
-            {persona.persona.keyInsights && persona.persona.keyInsights.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-                  Key Insights
-                </h4>
-                <div className="space-y-2">
-                  {persona.persona.keyInsights.map((insight, index) => (
-                    <div key={index} className="p-3 border rounded-lg">
-                      <div className="flex items-start gap-2">
-                        <Brain className="h-4 w-4 text-indigo-600 mt-0.5" />
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {insight}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* RAG Context Info */}
-            {persona.ragContext && persona.ragContext.length > 0 && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-800">
-                    Based on {persona.ragContext.length} similar customer patterns
-                  </span>
-                </div>
-                <p className="text-xs text-blue-700">
-                  AI analyzed similar customer interactions to build this persona.
-                </p>
-              </div>
-            )}
-
-            {/* Feedback */}
-            <div className="flex items-center justify-between pt-2 border-t">
-              <span className="text-xs text-muted-foreground">
-                Was this helpful?
-              </span>
-              <div className="flex gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleFeedback('thumbs_up')}
-                  className="h-8 w-8 p-0"
-                >
-                  <ThumbsUp className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleFeedback('thumbs_down')}
-                  className="h-8 w-8 p-0"
-                >
-                  <ThumbsDown className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-          </>
-        )}
-
-        {!persona && !loading && !error && (
-          <div className="text-center py-8 text-muted-foreground">
-            <User className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Click refresh to generate customer persona</p>
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          {/* Communication Style */}
+          <div className="mb-4">
+            <h4 className="text-label text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">
+              Communication Style
+            </h4>
+            <div className="p-3 border border-slate-200 dark:border-slate-700 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <MessageCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                  {persona.persona.communicationStyle}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Decision Making */}
+          <div className="mb-4">
+            <h4 className="text-label text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">
+              Decision Making
+            </h4>
+            <div className="p-3 border border-slate-200 dark:border-slate-700 rounded-lg">
+              <p className="text-sm text-slate-700 dark:text-slate-300">
+                {persona.persona.decisionMaking}
+              </p>
+            </div>
+          </div>
+
+          {/* Motivations */}
+          {persona.persona.motivations && persona.persona.motivations.length > 0 && (
+            <div className="mb-4">
+              <h4 className="text-label text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">
+                Key Motivations
+              </h4>
+              <div className="space-y-2">
+                {persona.persona.motivations.map((motivation, index) => (
+                  <div key={index} className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <Heart className="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-green-800 dark:text-green-300">{motivation}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Concerns */}
+          {persona.persona.concerns && persona.persona.concerns.length > 0 && (
+            <div className="mb-4">
+              <h4 className="text-label text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">
+                Key Concerns
+              </h4>
+              <div className="space-y-2">
+                {persona.persona.concerns.map((concern, index) => (
+                  <div key={index} className="flex items-start gap-2 p-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                    <AlertCircle className="w-4 h-4 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-orange-800 dark:text-orange-300">{concern}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Preferred Approach */}
+          <div className="mb-4">
+            <h4 className="text-label text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">
+              Recommended Approach
+            </h4>
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-300">
+                {persona.persona.preferredApproach}
+              </p>
+            </div>
+          </div>
+
+          {/* Key Insights */}
+          {persona.persona.keyInsights && persona.persona.keyInsights.length > 0 && (
+            <div className="mb-4">
+              <h4 className="text-label text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-2">
+                Key Insights
+              </h4>
+              <div className="space-y-2">
+                {persona.persona.keyInsights.map((insight, index) => (
+                  <div key={index} className="p-3 border border-slate-200 dark:border-slate-700 rounded-lg">
+                    <p className="text-sm text-slate-700 dark:text-slate-300">{insight}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* RAG Context Info */}
+          {persona.ragContext && persona.ragContext.length > 0 && (
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                  Based on {persona.ragContext.length} similar interactions
+                </span>
+              </div>
+              <p className="text-xs text-blue-700 dark:text-blue-400">
+                AI analyzed similar customer interactions to build this persona.
+              </p>
+            </div>
+          )}
+
+          {/* Feedback */}
+          <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-700">
+            <span className="text-sm text-slate-600 dark:text-slate-400">Was this helpful?</span>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleFeedback('positive')}
+                className="text-slate-500 hover:text-green-600 dark:text-slate-400 dark:hover:text-green-400"
+              >
+                <ThumbsUp className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleFeedback('negative')}
+                className="text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
+              >
+                <ThumbsDown className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
   );
 } 

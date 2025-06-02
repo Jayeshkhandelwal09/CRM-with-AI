@@ -93,6 +93,12 @@ export function ObjectionHandler({ dealId, className }: ObjectionHandlerProps) {
     if (!response) return;
     
     try {
+      await aiService.submitFeedback({
+        feature: 'objection_handler',
+        feedback: rating === 'thumbs_up' ? 'positive' : 'negative',
+        responseId: response.timestamp,
+        rating: rating === 'thumbs_up' ? 5 : 1
+      });
       console.log(`Feedback submitted: ${rating}`);
     } catch (err) {
       console.error('Failed to submit feedback:', err);

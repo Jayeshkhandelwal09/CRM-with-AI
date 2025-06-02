@@ -75,6 +75,12 @@ export function WinLossExplainer({ dealId, dealOutcome, dealValue, className }: 
     if (!analysis) return;
     
     try {
+      await aiService.submitFeedback({
+        feature: 'win_loss_explainer',
+        feedback: rating === 'thumbs_up' ? 'positive' : 'negative',
+        responseId: analysis.timestamp,
+        rating: rating === 'thumbs_up' ? 5 : 1
+      });
       console.log(`Feedback submitted: ${rating}`);
     } catch (err) {
       console.error('Failed to submit feedback:', err);

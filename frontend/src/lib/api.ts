@@ -630,10 +630,11 @@ export const api = {
   },
 
   async submitAIFeedback(feedbackData: {
-    aiLogId: string;
-    rating: 'thumbs_up' | 'thumbs_down';
-    comment?: string;
-    wasUseful?: boolean;
+    feature: 'deal_coach' | 'objection_handler' | 'persona_builder' | 'win_loss_explainer';
+    feedback: 'positive' | 'negative';
+    responseId?: string;
+    rating?: number;
+    comments?: string;
   }): Promise<ApiResponse<any>> {
     return apiClient.post('/ai/feedback', feedbackData);
   },
