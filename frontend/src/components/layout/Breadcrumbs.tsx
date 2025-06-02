@@ -16,7 +16,6 @@ const pathLabels: Record<string, string> = {
   deals: "Deals",
   analytics: "Analytics",
   ai: "AI Features",
-  profile: "Profile",
   settings: "Settings",
 };
 

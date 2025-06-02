@@ -8,7 +8,6 @@ import {
   BriefcaseIcon, 
   ChartBarIcon, 
   SparklesIcon, 
-  UserCircleIcon,
   ChevronLeftIcon,
   ChevronRightIcon
 } from "@heroicons/react/24/outline";
@@ -50,11 +49,6 @@ const navigationItems: NavigationItem[] = [
     name: "AI Features",
     href: "/dashboard/ai",
     icon: SparklesIcon,
-  },
-  {
-    name: "Profile",
-    href: "/dashboard/profile",
-    icon: UserCircleIcon,
   },
 ];
 

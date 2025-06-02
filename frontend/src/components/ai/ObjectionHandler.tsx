@@ -146,7 +146,7 @@ export function ObjectionHandler({ dealId, className }: ObjectionHandlerProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-label text-slate-700 dark:text-slate-300 mb-2">
-              Category (Optional)
+              Category 
             </label>
             <select
               value={category}
@@ -238,7 +238,7 @@ export function ObjectionHandler({ dealId, className }: ObjectionHandlerProps) {
             <div className="flex items-center justify-between">
               <span className="text-label text-slate-700 dark:text-slate-300">AI Confidence</span>
               <Badge className="bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700">
-                {typeof response.confidence === 'number' ? Math.round(response.confidence * 100) : 85}%
+                {typeof response.confidence === 'number' ? Math.round(response.confidence) : 85}%
               </Badge>
             </div>
           </div>
