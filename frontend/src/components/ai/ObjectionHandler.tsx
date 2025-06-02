@@ -34,13 +34,15 @@ export function ObjectionHandler({ dealId, className }: ObjectionHandlerProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const categories = [
-    { value: 'price', label: 'Price/Budget' },
-    { value: 'product', label: 'Product Fit' },
+    { value: 'price', label: 'Price' },
+    { value: 'budget', label: 'Budget' },
     { value: 'timing', label: 'Timing' },
     { value: 'authority', label: 'Decision Authority' },
     { value: 'need', label: 'Need/Urgency' },
     { value: 'trust', label: 'Trust/Credibility' },
-    { value: 'competition', label: 'Competition' },
+    { value: 'competitor', label: 'Competition' },
+    { value: 'features', label: 'Product Features' },
+    { value: 'support', label: 'Support/Service' },
     { value: 'other', label: 'Other' }
   ];
 
@@ -63,7 +65,7 @@ export function ObjectionHandler({ dealId, className }: ObjectionHandlerProps) {
     try {
       const objectionResponse = await aiService.handleObjection({
         objectionText: objectionText.trim(),
-        category: (category || 'other') as 'price' | 'product' | 'timing' | 'authority' | 'need' | 'trust' | 'competition' | 'other',
+        category: (category || 'other') as 'price' | 'budget' | 'timing' | 'authority' | 'need' | 'trust' | 'competitor' | 'features' | 'support' | 'other',
         severity: severity as 'low' | 'medium' | 'high' | 'critical',
         dealId
       });

@@ -156,7 +156,7 @@ class AIService {
   async handleObjection(objectionData: {
     objectionText: string;
     dealId?: string;
-    category?: 'price' | 'product' | 'timing' | 'authority' | 'need' | 'trust' | 'competition' | 'other';
+    category?: 'price' | 'budget' | 'timing' | 'authority' | 'need' | 'trust' | 'competitor' | 'features' | 'support' | 'other';
     severity?: 'low' | 'medium' | 'high' | 'critical';
   }): Promise<ObjectionHandlerResponse> {
     try {

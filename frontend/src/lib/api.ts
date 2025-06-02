@@ -670,7 +670,7 @@ export const api = {
   async handleObjection(objectionData: {
     objectionText: string;
     dealId?: string;
-    category?: 'price' | 'product' | 'timing' | 'authority' | 'need' | 'trust' | 'competition' | 'other';
+    category?: 'price' | 'budget' | 'timing' | 'authority' | 'need' | 'trust' | 'competitor' | 'features' | 'support' | 'other';
     severity?: 'low' | 'medium' | 'high' | 'critical';
   }): Promise<ApiResponse<any>> {
     return apiClient.post('/ai/objections/handle', objectionData);
