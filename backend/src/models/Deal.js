@@ -569,6 +569,9 @@ dealSchema.statics.getPipelineSummary = async function(ownerId = null) {
       : ownerId;
   }
   
+  // Only include active deals in pipeline summary
+  matchStage.isActive = true;
+  
   const pipeline = await this.aggregate([
     { $match: matchStage },
     {

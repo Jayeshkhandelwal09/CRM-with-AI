@@ -33,6 +33,16 @@ const getContacts = async (req, res) => {
       query.status = req.query.status;
     }
 
+    // Add leadSource filter
+    if (req.query.leadSource) {
+      query.leadSource = req.query.leadSource;
+    }
+
+    // Add priority filter
+    if (req.query.priority) {
+      query.priority = req.query.priority;
+    }
+
     // Add company filter
     if (req.query.company) {
       query.company = new RegExp(req.query.company, 'i');
@@ -41,24 +51,38 @@ const getContacts = async (req, res) => {
     // Add tags filter
     if (req.query.tags) {
       const tags = Array.isArray(req.query.tags) ? req.query.tags : [req.query.tags];
-      query.tags = { $in: tags };
+      query.tags = { $in: tags.map(tag => new RegExp(tag, 'i')) };
     }
 
-    // Sort options
+    // Sort options - improved to handle all frontend options
     let sortOption = { createdAt: -1 }; // Default sort by newest
+    const sortOrder = req.query.sortOrder === 'asc' ? 1 : -1;
+    
     if (req.query.sortBy) {
       switch (req.query.sortBy) {
-        case 'name':
-          sortOption = { firstName: 1, lastName: 1 };
+        case 'firstName':
+          sortOption = { firstName: sortOrder, lastName: sortOrder };
+          break;
+        case 'lastName':
+          sortOption = { lastName: sortOrder, firstName: sortOrder };
+          break;
+        case 'email':
+          sortOption = { email: sortOrder };
           break;
         case 'company':
-          sortOption = { company: 1 };
+          sortOption = { company: sortOrder };
           break;
-        case 'lastContact':
-          sortOption = { lastContactDate: -1 };
+        case 'createdAt':
+          sortOption = { createdAt: sortOrder };
           break;
-        case 'nextFollowUp':
-          sortOption = { nextFollowUpDate: 1 };
+        case 'updatedAt':
+          sortOption = { updatedAt: sortOrder };
+          break;
+        case 'lastContactDate':
+          sortOption = { lastContactDate: sortOrder };
+          break;
+        case 'nextFollowUpDate':
+          sortOption = { nextFollowUpDate: sortOrder };
           break;
         default:
           sortOption = { createdAt: -1 };
@@ -135,11 +159,24 @@ const getContactById = async (req, res) => {
       });
     }
 
-    logger.info(`Retrieved contact ${contactId} for user ${userId}`);
+    // Get interaction count for this contact
+    const Interaction = require('../models/Interaction');
+    const interactionCount = await Interaction.countDocuments({
+      contactId: contactId,
+      owner: userId
+    });
+
+    // Add interaction count to contact data
+    const contactWithStats = {
+      ...contact.toObject(),
+      interactionCount
+    };
+
+    logger.info(`Retrieved contact ${contactId} for user ${userId} with ${interactionCount} interactions`);
 
     res.status(200).json({
       success: true,
-      data: contact
+      data: contactWithStats
     });
 
   } catch (error) {
@@ -399,10 +436,143 @@ const deleteContact = async (req, res) => {
   }
 };
 
+/**
+ * Get interactions for a specific contact
+ * GET /api/contacts/:id/interactions
+ */
+const getContactInteractions = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const contactId = req.params.id;
+    const {
+      page = 1,
+      limit = 20,
+      type,
+      startDate,
+      endDate
+    } = req.query;
+
+    // Verify contact exists and belongs to user
+    const contact = await Contact.findOne({
+      _id: contactId,
+      owner: userId,
+      isDuplicate: false
+    });
+
+    if (!contact) {
+      return res.status(404).json({
+        success: false,
+        error: 'Contact not found'
+      });
+    }
+
+    // Pagination
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Build query for interactions
+    const Interaction = require('../models/Interaction');
+    const query = {
+      contactId: contactId,
+      owner: userId
+    };
+
+    // Add type filter
+    if (type) {
+      query.type = type;
+    }
+
+    // Add date range filter
+    if (startDate || endDate) {
+      query.date = {};
+      if (startDate) query.date.$gte = new Date(startDate);
+      if (endDate) query.date.$lte = new Date(endDate);
+    }
+
+    // Execute query with pagination
+    const [interactions, totalInteractions] = await Promise.all([
+      Interaction.find(query)
+        .populate('dealId', 'title value stage')
+        .sort({ date: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      Interaction.countDocuments(query)
+    ]);
+
+    // Calculate pagination info
+    const totalPages = Math.ceil(totalInteractions / limitNum);
+    const hasNextPage = pageNum < totalPages;
+    const hasPrevPage = pageNum > 1;
+
+    // Format interactions for frontend
+    const formattedInteractions = interactions.map(interaction => ({
+      id: interaction._id,
+      subject: interaction.subject || `${interaction.type} interaction`,
+      type: interaction.type,
+      date: interaction.date,
+      notes: interaction.notes,
+      duration: interaction.duration,
+      outcome: interaction.outcome,
+      dealId: interaction.dealId ? {
+        id: interaction.dealId._id,
+        title: interaction.dealId.title,
+        value: interaction.dealId.value,
+        stage: interaction.dealId.stage
+      } : null,
+      contactId: {
+        id: contact._id,
+        firstName: contact.firstName,
+        lastName: contact.lastName,
+        company: contact.company
+      }
+    }));
+
+    logger.info(`Retrieved ${formattedInteractions.length} interactions for contact ${contactId}`, {
+      userId,
+      contactId,
+      totalInteractions,
+      filters: { type, startDate, endDate }
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        data: formattedInteractions,
+        pagination: {
+          currentPage: pageNum,
+          totalPages,
+          totalInteractions,
+          hasNextPage,
+          hasPrevPage,
+          limit: limitNum
+        }
+      }
+    });
+
+  } catch (error) {
+    logger.error('Error retrieving contact interactions:', error);
+    
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid contact ID format'
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrieve contact interactions'
+    });
+  }
+};
+
 module.exports = {
   getContacts,
   getContactById,
   createContact,
   updateContact,
-  deleteContact
+  deleteContact,
+  getContactInteractions
 }; 

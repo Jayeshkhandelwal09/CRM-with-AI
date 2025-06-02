@@ -11,7 +11,8 @@ const {
   getContactById,
   createContact,
   updateContact,
-  deleteContact
+  deleteContact,
+  getContactInteractions
 } = require('../controllers/contactController');
 
 // Apply authentication middleware to all routes
@@ -27,6 +28,13 @@ router.use(contactLimiter);
  * @params  page, limit, search, status, company, tags, sortBy
  */
 router.get('/', getContacts);
+
+/**
+ * @route   GET /api/contacts/:id/interactions
+ * @desc    Get interactions for a specific contact
+ * @access  Private
+ */
+router.get('/:id/interactions', getContactInteractions);
 
 /**
  * @route   GET /api/contacts/:id

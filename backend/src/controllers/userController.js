@@ -312,45 +312,130 @@ const getUserActivity = async (req, res) => {
       endDate
     } = req.query;
 
-    // Build query for user activities (interactions related to user's contacts and deals)
-    const query = { owner: userId };
-    
-    if (type) {
-      query.type = type;
-    }
-    
-    if (startDate || endDate) {
-      query.date = {};
-      if (startDate) query.date.$gte = new Date(startDate);
-      if (endDate) query.date.$lte = new Date(endDate);
-    }
-
     // Pagination
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const skip = (pageNum - 1) * limitNum;
 
-    // Get activities (interactions from contacts and deals)
-    const activities = await Interaction.find(query)
-      .populate('contactId', 'firstName lastName email company')
-      .populate('dealId', 'title value stage')
-      .sort({ date: -1 })
-      .skip(skip)
-      .limit(limitNum)
-      .lean();
+    // Build activities from multiple sources
+    let activities = [];
 
-    const totalActivities = await Interaction.countDocuments(query);
+    // 1. Get interactions
+    const interactionQuery = { owner: userId };
+    if (type && type === 'interaction') {
+      // Only get interactions if specifically requested
+    } else if (!type) {
+      // Include interactions in general activity feed
+      const interactions = await Interaction.find(interactionQuery)
+        .populate('contactId', 'firstName lastName email company')
+        .populate('dealId', 'title value stage')
+        .sort({ date: -1 })
+        .limit(limitNum * 2) // Get more to mix with other activities
+        .lean();
+
+      activities.push(...interactions.map(interaction => ({
+        id: interaction._id,
+        subject: interaction.subject || `${interaction.type} with ${interaction.contactId?.firstName} ${interaction.contactId?.lastName}`,
+        type: 'interaction',
+        date: interaction.date,
+        contactId: interaction.contactId ? {
+          id: interaction.contactId._id,
+          firstName: interaction.contactId.firstName,
+          lastName: interaction.contactId.lastName,
+          company: interaction.contactId.company
+        } : null,
+        dealId: interaction.dealId ? {
+          id: interaction.dealId._id,
+          title: interaction.dealId.title,
+          value: interaction.dealId.value,
+          stage: interaction.dealId.stage
+        } : null
+      })));
+    }
+
+    // 2. Get recent deal activities
+    if (!type || type === 'deal_created' || type === 'deal_updated') {
+      const dealQuery = { owner: userId };
+      if (startDate || endDate) {
+        dealQuery.createdAt = {};
+        if (startDate) dealQuery.createdAt.$gte = new Date(startDate);
+        if (endDate) dealQuery.createdAt.$lte = new Date(endDate);
+      }
+
+      const deals = await Deal.find(dealQuery)
+        .populate('contact', 'firstName lastName email company')
+        .sort({ createdAt: -1 })
+        .limit(limitNum)
+        .lean();
+
+      activities.push(...deals.map(deal => ({
+        id: `deal_${deal._id}`,
+        subject: `Deal "${deal.title}" created`,
+        type: 'deal_created',
+        date: deal.createdAt,
+        dealId: {
+          id: deal._id,
+          title: deal.title,
+          value: deal.value,
+          stage: deal.stage
+        },
+        contactId: deal.contact ? {
+          id: deal.contact._id,
+          firstName: deal.contact.firstName,
+          lastName: deal.contact.lastName,
+          company: deal.contact.company
+        } : null
+      })));
+    }
+
+    // 3. Get recent contact activities
+    if (!type || type === 'contact_created') {
+      const contactQuery = { owner: userId };
+      if (startDate || endDate) {
+        contactQuery.createdAt = {};
+        if (startDate) contactQuery.createdAt.$gte = new Date(startDate);
+        if (endDate) contactQuery.createdAt.$lte = new Date(endDate);
+      }
+
+      const contacts = await Contact.find(contactQuery)
+        .sort({ createdAt: -1 })
+        .limit(limitNum)
+        .lean();
+
+      activities.push(...contacts.map(contact => ({
+        id: `contact_${contact._id}`,
+        subject: `Contact "${contact.firstName} ${contact.lastName}" created`,
+        type: 'contact_created',
+        date: contact.createdAt,
+        contactId: {
+          id: contact._id,
+          firstName: contact.firstName,
+          lastName: contact.lastName,
+          company: contact.company
+        }
+      })));
+    }
+
+    // Sort all activities by date and paginate
+    activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const totalActivities = activities.length;
+    const paginatedActivities = activities.slice(skip, skip + limitNum);
     const totalPages = Math.ceil(totalActivities / limitNum);
 
-    logger.info(`Retrieved ${activities.length} activities for user ${userId}`, {
+    logger.info(`Retrieved ${paginatedActivities.length} activities for user ${userId}`, {
       userId,
-      totalActivities
+      totalActivities,
+      activitiesBreakdown: {
+        interactions: activities.filter(a => a.type === 'interaction').length,
+        deals: activities.filter(a => a.type === 'deal_created').length,
+        contacts: activities.filter(a => a.type === 'contact_created').length
+      }
     });
 
     res.status(200).json({
       success: true,
       data: {
-        activities,
+        data: paginatedActivities, // Frontend expects 'data' field
         pagination: {
           currentPage: pageNum,
           totalPages,

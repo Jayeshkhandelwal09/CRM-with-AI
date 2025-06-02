@@ -115,6 +115,15 @@ class AIService {
    * @returns {string} - Cache key
    */
   generateCacheKey(feature, params) {
+    // For persona builder, include contactId to ensure unique cache per contact
+    if (feature === 'persona_builder' && params.options && params.options.contactId) {
+      // Create a hash from the combined prompts for uniqueness
+      const crypto = require('crypto');
+      const promptContent = params.systemPrompt + '|' + params.userPrompt;
+      const promptHash = crypto.createHash('md5').update(promptContent).digest('hex').slice(0, 8);
+      return `${feature}_${params.options.contactId}_${promptHash}`;
+    }
+    
     const paramsString = JSON.stringify(params);
     return `${feature}_${Buffer.from(paramsString).toString('base64').slice(0, 20)}`;
   }
@@ -149,6 +158,18 @@ class AIService {
       });
 
       await logEntry.save();
+      
+      // Update user's AI usage counter for successful requests
+      if (status === 'completed') {
+        const User = require('../models/User');
+        const user = await User.findById(userId);
+        if (user) {
+          user.incrementAiRequests();
+          await user.save();
+          console.log(`📊 Updated AI usage for user ${userId}: ${user.usage.aiRequestsToday}/${user.limits.aiRequestsPerDay}`);
+        }
+      }
+      
       console.log(`📝 AI request logged: ${feature} for user ${userId}`);
       return logEntry;
       
@@ -220,7 +241,7 @@ class AIService {
       }
 
       // Check cache
-      const cacheKey = this.generateCacheKey(feature, { systemPrompt, userPrompt });
+      const cacheKey = this.generateCacheKey(feature, { systemPrompt, userPrompt, options });
       const cachedResponse = this.getCachedResponse(cacheKey);
       if (cachedResponse && !options.skipCache) {
         console.log(`📦 Cache hit for key: ${cacheKey.substring(0, 50)}...`);

@@ -241,32 +241,176 @@ const exportContacts = async (req, res) => {
 };
 
 /**
- * Get import template CSV
+ * Get CSV import template with sample data
  * GET /api/csv/contacts/template
  */
 const getImportTemplate = async (req, res) => {
   try {
-    const templateResult = ContactExport.getImportTemplate();
+    const includeExamples = req.query.examples !== 'false'; // default true
+    
+    // Define headers
+    const headers = [
+      'firstName',
+      'lastName', 
+      'email',
+      'phone',
+      'company',
+      'jobTitle',
+      'department',
+      'website',
+      'linkedinUrl',
+      'status',
+      'leadSource',
+      'priority',
+      'tags',
+      'street',
+      'city',
+      'state',
+      'zipCode',
+      'country',
+      'notes',
+      'description'
+    ];
 
-    if (!templateResult.success) {
-      return res.status(500).json(templateResult);
+    let csvContent = headers.join(',') + '\n';
+
+    // Add sample data if requested
+    if (includeExamples) {
+      const sampleData = [
+        [
+          'John',
+          'Smith',
+          'john.smith@example.com',
+          '+1-555-123-4567',
+          'Tech Solutions Inc',
+          'Software Engineer',
+          'Engineering',
+          'https://techsolutions.com',
+          'https://linkedin.com/in/johnsmith',
+          'prospect',
+          'website',
+          'high',
+          'technology,software,lead',
+          '123 Main Street',
+          'San Francisco',
+          'California',
+          '94105',
+          'United States',
+          'Interested in our enterprise solution',
+          'Potential high-value client'
+        ],
+        [
+          'Sarah',
+          'Johnson',
+          'sarah.johnson@marketing.co',
+          '+1-555-987-6543',
+          'Marketing Pro LLC',
+          'Marketing Director',
+          'Marketing',
+          'https://marketingpro.com',
+          'https://linkedin.com/in/sarahjohnson',
+          'customer',
+          'referral',
+          'medium',
+          'marketing,customer,active',
+          '456 Business Ave',
+          'New York',
+          'New York',
+          '10001',
+          'United States',
+          'Current customer, very satisfied',
+          'Long-term partnership potential'
+        ],
+        [
+          'Michael',
+          'Chen',
+          'michael.chen@startup.io',
+          '+1-555-456-7890',
+          'Innovation Startup',
+          'CTO',
+          'Technology',
+          'https://innovationstartup.io',
+          'https://linkedin.com/in/michaelchen',
+          'lead',
+          'social_media',
+          'urgent',
+          'startup,technology,innovation',
+          '789 Startup Blvd',
+          'Austin',
+          'Texas',
+          '73301',
+          'United States',
+          'Reached out via LinkedIn, very interested',
+          'Fast-growing startup with budget'
+        ],
+        [
+          'Emily',
+          'Rodriguez',
+          'emily.rodriguez@consulting.com',
+          '+1-555-321-0987',
+          'Business Consulting Group',
+          'Senior Consultant',
+          'Consulting',
+          'https://businessconsulting.com',
+          'https://linkedin.com/in/emilyrodriguez',
+          'active',
+          'email_campaign',
+          'low',
+          'consulting,business,services',
+          '321 Corporate Dr',
+          'Chicago',
+          'Illinois',
+          '60601',
+          'United States',
+          'Responded to email campaign',
+          'Potential for consulting services'
+        ],
+        [
+          'David',
+          'Wilson',
+          'david.wilson@finance.org',
+          '+1-555-654-3210',
+          'Financial Services Corp',
+          'VP Finance',
+          'Finance',
+          'https://financialservices.org',
+          'https://linkedin.com/in/davidwilson',
+          'inactive',
+          'cold_call',
+          'medium',
+          'finance,services,corporate',
+          '654 Finance St',
+          'Boston',
+          'Massachusetts',
+          '02101',
+          'United States',
+          'Initial contact made, follow-up needed',
+          'Large enterprise opportunity'
+        ]
+      ];
+
+      // Add sample rows
+      sampleData.forEach(row => {
+        csvContent += row.map(field => `"${field}"`).join(',') + '\n';
+      });
     }
 
-    logger.info('Import template requested');
-
-    // Set response headers for file download
+    // Set headers for file download
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename="${templateResult.filename}"`);
-    res.setHeader('Content-Length', Buffer.byteLength(templateResult.data, 'utf8'));
+    res.setHeader('Content-Disposition', 'attachment; filename="contacts_import_template.csv"');
+    
+    logger.info('CSV import template downloaded', {
+      includeExamples,
+      headers: headers.length
+    });
 
-    // Send template data
-    res.status(200).send(templateResult.data);
+    res.status(200).send(csvContent);
 
   } catch (error) {
-    logger.error('Error generating import template:', error);
+    logger.error('Error generating CSV import template:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to generate import template'
+      error: 'Failed to generate CSV import template'
     });
   }
 };

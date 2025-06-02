@@ -139,8 +139,8 @@ const userSchema = new mongoose.Schema({
     },
     aiRequestsPerDay: {
       type: Number,
-      default: 100,
-      max: 100
+      default: 500,
+      max: 500
     }
   },
   

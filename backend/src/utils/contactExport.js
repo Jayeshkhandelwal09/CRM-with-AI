@@ -99,7 +99,16 @@ class ContactExport {
       'nextFollowUpDate',
       'interactionCount',
       'createdAt',
-      'updatedAt'
+      'updatedAt',
+      // Social Media fields
+      'twitter',
+      'facebook',
+      'instagram',
+      // Preference fields
+      'preferredContactMethod',
+      'timezone',
+      'doNotContact',
+      'emailOptOut'
     ];
   }
 

@@ -304,7 +304,8 @@ class AIController {
         {
           userId,
           ragContext: similarInteractions,
-          maxTokens: 450
+          maxTokens: 450,
+          contactId: contactId
         }
       );
 
@@ -917,31 +918,46 @@ Provide a thoughtful, persuasive response that addresses the customer's concern.
   }
 
   createPersonaBuilderSystemPrompt() {
-    return `You are an expert customer psychology analyst. Create detailed customer personas based on interaction data.
+    return `You are an expert customer psychology analyst and sales strategist. Create detailed, personalized customer personas based on specific contact data and interaction history.
 
 Guidelines:
-- Analyze communication patterns and preferences
-- Identify decision-making style and motivations
-- Assess engagement level and buying signals
-- Provide actionable insights for sales approach
-- Base analysis on actual interaction data
-- Be specific about communication preferences
+- Analyze the specific contact's role, company, and communication patterns
+- Identify unique decision-making style based on their job function and seniority
+- Assess engagement level from actual interaction history and response patterns
+- Provide specific, actionable insights tailored to this individual
+- Consider their industry context, company size, and department dynamics
+- Base analysis on real data points, not generic assumptions
+- Make recommendations specific to their communication preferences and history
+- Differentiate between contacts - each persona should be unique
 
-Format your response as JSON:
+Key Analysis Areas:
+1. Communication Style: How they prefer to communicate based on role and interactions
+2. Decision Making: Their authority level, process, and timeline preferences
+3. Motivations: What drives them professionally based on their role and company
+4. Concerns: Specific challenges they face in their position and industry
+5. Engagement Level: Based on actual interaction frequency and quality
+6. Preferred Approach: Tailored sales strategy for this specific individual
+7. Key Insights: Unique observations about this contact's behavior and preferences
+
+Format your response as JSON with detailed, specific content:
 {
-  "communicationStyle": "direct|analytical|expressive|amiable",
-  "decisionMaking": "quick|deliberate|consensus|analytical",
-  "motivations": ["motivation1", "motivation2"],
-  "concerns": ["concern1", "concern2"],
+  "communicationStyle": "detailed description of how this specific person communicates",
+  "decisionMaking": "specific analysis of their decision-making process and authority",
+  "motivations": ["specific motivation 1", "specific motivation 2", "specific motivation 3"],
+  "concerns": ["specific concern 1", "specific concern 2", "specific concern 3"],
   "engagementLevel": "high|medium|low",
-  "preferredApproach": "specific recommendation for sales approach",
-  "keyInsights": ["insight1", "insight2"]
-}`;
+  "preferredApproach": "detailed, specific recommendation for sales approach tailored to this individual",
+  "keyInsights": ["specific insight 1", "specific insight 2", "specific insight 3"]
+}
+
+Make each field detailed and specific to the individual contact. Avoid generic responses.`;
   }
 
   createPersonaBuilderUserPrompt(contact, similarInteractions) {
     const interactions = contact.interactions || [];
+    const deals = contact.deals || [];
     const recentInteractions = interactions.slice(-5);
+    const recentDeals = deals.slice(-3);
 
     const similarContext = similarInteractions.length > 0
       ? `\n\nSimilar customer patterns:\n${similarInteractions.map(i => 
@@ -949,22 +965,51 @@ Format your response as JSON:
         ).join('\n')}`
       : '';
 
-    return `Analyze this customer and create a detailed persona:
+    const contactName = `${contact.firstName} ${contact.lastName}`;
+    const dealHistory = recentDeals.length > 0 
+      ? `\n\nDeal History:\n${recentDeals.map(d => 
+          `- $${d.value || 0} deal in ${d.stage} stage (${d.closeReason || 'ongoing'})`
+        ).join('\n')}`
+      : '';
 
-Customer: ${contact.name}
+    return `Analyze this specific customer and create a detailed, personalized persona:
+
+Customer: ${contactName}
+Email: ${contact.email}
 Company: ${contact.company || 'Unknown'}
-Industry: ${contact.industry || 'Unknown'}
-Title: ${contact.title || 'Unknown'}
+Job Title: ${contact.jobTitle || 'Unknown'}
+Department: ${contact.department || 'Unknown'}
+Status: ${contact.status || 'Unknown'}
+Lead Source: ${contact.leadSource || 'Unknown'}
+Priority: ${contact.priority || 'Unknown'}
+Phone: ${contact.phone || 'Not provided'}
+Website: ${contact.website || 'Not provided'}
 
-Recent Interactions:
+Contact Preferences:
+- Preferred Contact Method: ${contact.preferences?.preferredContactMethod || 'email'}
+- Timezone: ${contact.preferences?.timezone || 'UTC'}
+- Do Not Contact: ${contact.preferences?.doNotContact ? 'Yes' : 'No'}
+
+Recent Interactions (${interactions.length} total):
 ${recentInteractions.map(i => 
-  `- ${i.type} (${i.duration || 'Unknown'} min): ${i.notes || 'No notes'} | Outcome: ${i.outcome || 'Unknown'}`
-).join('\n') || 'No interactions recorded'}
+  `- ${i.type} (${new Date(i.date).toLocaleDateString()}): ${i.notes || 'No notes'} | Outcome: ${i.outcome || 'Unknown'} | Duration: ${i.duration || 'Unknown'} min`
+).join('\n') || 'No interactions recorded'}${dealHistory}
 
-Total Interactions: ${interactions.length}
-Tags: ${contact.tags?.join(', ') || 'None'}${similarContext}
+Contact Notes: ${contact.notes || 'No notes available'}
+Description: ${contact.description || 'No description available'}
+Tags: ${contact.tags?.join(', ') || 'None'}
+Last Contact: ${contact.lastContactDate ? new Date(contact.lastContactDate).toLocaleDateString() : 'Never'}
+Next Follow-up: ${contact.nextFollowUpDate ? new Date(contact.nextFollowUpDate).toLocaleDateString() : 'Not scheduled'}${similarContext}
 
-Create a comprehensive persona with communication style, decision-making patterns, and sales approach recommendations.`;
+Based on this specific contact's information, communication history, job role, company context, and interaction patterns, create a comprehensive and unique persona. Focus on:
+1. Their specific communication style based on their role (${contact.jobTitle}) at ${contact.company}
+2. Decision-making patterns relevant to their department (${contact.department}) and seniority level
+3. Motivations specific to their industry and company size
+4. Concerns relevant to their role and company context
+5. Engagement level based on actual interaction history and response patterns
+6. Tailored sales approach considering their preferred contact method and communication history
+
+Make the analysis specific to this individual contact, not generic.`;
   }
 
   parsePersonaBuilderResponse(content) {
@@ -1068,7 +1113,12 @@ Provide a comprehensive analysis of why this deal was ${deal.stage === 'closed_w
   }
 
   createPersonaQueryContext(contact) {
-    return `${contact.industry || 'Unknown'} industry contact ${contact.title || ''} at ${contact.company || ''}`;
+    const contactName = `${contact.firstName} ${contact.lastName}`;
+    const jobInfo = contact.jobTitle ? `${contact.jobTitle}` : 'professional';
+    const companyInfo = contact.company ? `at ${contact.company}` : '';
+    const departmentInfo = contact.department ? `in ${contact.department}` : '';
+    
+    return `${jobInfo} ${departmentInfo} ${companyInfo} contact ${contactName} with ${contact.interactionCount || 0} interactions`;
   }
 
   createWinLossQueryContext(deal) {
