@@ -107,11 +107,30 @@ class ContentFilter {
       // Step 4: OpenAI Moderation API (for critical contexts)
       if (context === 'objection_handler' || context === 'persona_builder') {
         const moderationResult = await this.openaiModeration(content);
-        if (!moderationResult.isAllowed) {
+        
+        // Only block if moderation API is working AND content is flagged
+        if (moderationResult.apiSuccess && !moderationResult.isAllowed) {
+          console.log(`🚫 Content flagged by OpenAI moderation: ${moderationResult.categories.map(c => c.category).join(', ')}`);
           return {
             isAllowed: false,
             reason: 'ai_moderation',
             details: moderationResult.categories,
+            severity: 'high'
+          };
+        }
+        
+        // Log if API failed but we're allowing content
+        if (!moderationResult.apiSuccess && moderationResult.warning) {
+          console.log(`⚠️ ${moderationResult.warning}`);
+        }
+        
+        // Log if API authentication failed
+        if (moderationResult.error) {
+          console.error(`❌ ${moderationResult.error}`);
+          return {
+            isAllowed: false,
+            reason: 'api_configuration_error',
+            details: moderationResult.error,
             severity: 'high'
           };
         }
@@ -276,6 +295,8 @@ class ContentFilter {
    */
   async openaiModeration(content) {
     try {
+      console.log('🔍 Running OpenAI moderation check...');
+      
       const moderation = await this.openai.moderations.create({
         input: content,
       });
@@ -294,19 +315,38 @@ class ContentFilter {
         }
       }
 
+      console.log(`✅ OpenAI moderation completed. Flagged: ${result.flagged}`);
+      
       return {
         isAllowed: !result.flagged,
         categories: flaggedCategories,
-        scores: result.category_scores
+        scores: result.category_scores,
+        apiSuccess: true
       };
 
     } catch (error) {
-      console.error('OpenAI Moderation API error:', error);
-      // If moderation API fails, err on the side of caution
+      console.error('⚠️ OpenAI Moderation API error:', error.message);
+      
+      // Check if it's an API key issue
+      if (error.message.includes('401') || error.message.includes('authentication')) {
+        console.error('❌ OpenAI API key authentication failed');
+        return {
+          isAllowed: false,
+          categories: [{ category: 'api_auth_error', score: 1.0 }],
+          scores: {},
+          apiSuccess: false,
+          error: 'OpenAI API authentication failed'
+        };
+      }
+      
+      // For other API errors (network, rate limits, etc.), allow content but log the issue
+      console.log('⚠️ OpenAI API unavailable, skipping moderation check');
       return {
-        isAllowed: false,
-        categories: [{ category: 'moderation_api_error', score: 1.0 }],
-        scores: {}
+        isAllowed: true, // Allow content when API is unavailable
+        categories: [],
+        scores: {},
+        apiSuccess: false,
+        warning: 'OpenAI moderation unavailable - content allowed by default'
       };
     }
   }
@@ -401,6 +441,19 @@ class ContentFilter {
         keyInsights: ["Content must be business-appropriate for analysis"]
       }
     };
+
+    // Special handling for API configuration errors
+    if (reason === 'api_configuration_error') {
+      return {
+        success: false,
+        error: 'AI service configuration error',
+        fallback: true,
+        data: { 
+          message: "AI service is temporarily unavailable. Please try again later or contact support.",
+          technical: "OpenAI API authentication failed"
+        }
+      };
+    }
 
     return {
       success: false,

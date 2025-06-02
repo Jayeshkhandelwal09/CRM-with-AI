@@ -94,7 +94,7 @@ const userSchema = new mongoose.Schema({
   preferences: {
     theme: {
       type: String,
-      enum: ['light', 'dark', 'system'],
+      enum: ['light', 'dark', 'system', 'auto'],
       default: 'system'
     },
     timezone: {
@@ -184,7 +184,6 @@ userSchema.virtual('fullName').get(function() {
 });
 
 // Index for performance
-userSchema.index({ email: 1 });
 userSchema.index({ createdAt: -1 });
 userSchema.index({ lastLogin: -1 });
 

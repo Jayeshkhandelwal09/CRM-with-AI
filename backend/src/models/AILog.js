@@ -282,8 +282,7 @@ aiLogSchema.index({ userId: 1, createdAt: -1 });
 aiLogSchema.index({ userId: 1, status: 1 });
 aiLogSchema.index({ feature: 1, status: 1 });
 aiLogSchema.index({ feature: 1, createdAt: -1 });
-aiLogSchema.index({ dealId: 1, feature: 1 });
-aiLogSchema.index({ retentionDate: 1 }); // For cleanup jobs
+aiLogSchema.index({ dealId: 1, feature: 1 }); // For cleanup jobs
 
 // TTL index for automatic cleanup
 aiLogSchema.index({ retentionDate: 1 }, { expireAfterSeconds: 0 });

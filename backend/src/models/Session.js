@@ -287,7 +287,6 @@ sessionSchema.index({ isActive: 1 });
 sessionSchema.index({ startTime: -1 });
 sessionSchema.index({ lastActivity: -1 });
 sessionSchema.index({ sessionType: 1 });
-sessionSchema.index({ retentionDate: 1 });
 
 // Compound indexes for common queries
 sessionSchema.index({ userId: 1, isActive: 1 });

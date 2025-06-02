@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const config = {
   // Server Configuration
-  port: process.env.PORT || 5000,
+  port: process.env.PORT || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
 
   // Database Configuration
@@ -62,7 +62,7 @@ if (config.nodeEnv === 'production') {
   ];
 
   const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
-  
+
   if (missingEnvVars.length > 0) {
     throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
   }
