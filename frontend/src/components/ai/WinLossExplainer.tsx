@@ -17,7 +17,14 @@ import {
   Clock,
   MessageCircle,
   Target,
-  Lightbulb
+  Lightbulb,
+  Star,
+  Activity,
+  BarChart3,
+  Users,
+  Calendar,
+  Award,
+  ArrowRight
 } from 'lucide-react';
 import { aiService, WinLossExplainerResponse } from '@/services/aiService';
 
@@ -31,11 +38,11 @@ interface WinLossExplainerProps {
 const getOutcomeIcon = (outcome: string) => {
   switch (outcome) {
     case 'won':
-      return <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />;
+      return <Award className="w-6 h-6 text-white" />;
     case 'lost':
-      return <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />;
+      return <XCircle className="w-6 h-6 text-white" />;
     default:
-      return <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />;
+      return <Clock className="w-6 h-6 text-white" />;
   }
 };
 
@@ -47,6 +54,17 @@ const getOutcomeColor = (outcome: string) => {
       return 'text-red-700 bg-red-50 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800';
     default:
       return 'text-yellow-700 bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800';
+  }
+};
+
+const getOutcomeGradient = (outcome: string) => {
+  switch (outcome) {
+    case 'won':
+      return 'from-green-500 to-emerald-600';
+    case 'lost':
+      return 'from-red-500 to-rose-600';
+    default:
+      return 'from-yellow-500 to-orange-600';
   }
 };
 
@@ -93,26 +111,27 @@ export function WinLossExplainer({ dealId, dealOutcome, dealValue, className }: 
     }
   };
 
+  const confidenceLevel = Math.round((analysis?.confidence || 0.8));
+  const outcome = analysis?.analysis?.outcome || dealOutcome.split('_')[1];
+
   return (
     <div className={`glass-card ${className}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-            dealOutcome === 'closed_won' 
-              ? 'bg-gradient-to-br from-green-500 to-green-600' 
-              : 'bg-gradient-to-br from-red-500 to-red-600'
-          }`}>
-            {dealOutcome === 'closed_won' ? (
-              <TrendingUp className="w-5 h-5 text-white" />
-            ) : (
-              <TrendingDown className="w-5 h-5 text-white" />
-            )}
+      {/* Enhanced Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div className={`w-12 h-12 bg-gradient-to-br ${getOutcomeGradient(outcome)} rounded-xl flex items-center justify-center shadow-lg`}>
+              {getOutcomeIcon(outcome)}
+            </div>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-white dark:border-slate-800 flex items-center justify-center">
+              <BarChart3 className="w-2 h-2 text-white" />
+            </div>
           </div>
           <div>
-            <h3 className="text-h3">Win/Loss Analysis</h3>
+            <h3 className="text-h2 font-semibold text-slate-900 dark:text-slate-100">Win/Loss Analysis</h3>
             {lastUpdated && (
-              <p className="text-caption text-slate-500 dark:text-slate-400">
+              <p className="text-caption text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                <Clock className="w-3 h-3" />
                 Last updated: {lastUpdated.toLocaleTimeString()}
               </p>
             )}
@@ -124,61 +143,104 @@ export function WinLossExplainer({ dealId, dealOutcome, dealValue, className }: 
           size="sm"
           onClick={fetchAnalysis}
           disabled={loading}
-          className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+          className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 rounded-lg h-10 w-10 p-0"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
         </Button>
       </div>
 
-      {/* Loading State */}
+      {/* Enhanced Loading State */}
       {loading && (
-        <div className="space-y-4">
-          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4">
-            <Skeleton className="h-4 w-24 mb-2" />
-            <Skeleton className="h-6 w-20" />
+        <div className="space-y-6">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-100 dark:border-blue-800">
+            <div className="flex items-center gap-3 mb-4">
+              <Skeleton className="h-5 w-5 rounded" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+            <Skeleton className="h-2 w-full rounded-full" />
           </div>
-          <div className="space-y-3">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
+          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-4 mb-4">
+              <Skeleton className="h-12 w-12 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-24 rounded-full" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+                <div className="flex items-start gap-4">
+                  <Skeleton className="h-8 w-8 rounded-lg" />
+                  <div className="flex-1 space-y-3">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
-            <span className="text-label font-medium text-red-800 dark:text-red-300">Error</span>
+        <div className="p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+              <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+            </div>
+            <span className="text-label font-semibold text-red-800 dark:text-red-300">Analysis Failed</span>
           </div>
-          <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+          <p className="text-sm text-red-700 dark:text-red-400 leading-relaxed">{error}</p>
         </div>
       )}
 
       {/* Content */}
       {analysis && !loading && !error && (
-        <div className="space-y-6">
-          {/* AI Confidence */}
-          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-label text-slate-700 dark:text-slate-300">AI Confidence</span>
-              <Badge className="bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700">
-                {Math.round((analysis.confidence || 0.8) * 100)}%
+        <div className="space-y-8">
+          {/* Enhanced AI Confidence */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-100 dark:border-blue-800">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                  <Star className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <span className="text-label font-medium text-blue-900 dark:text-blue-100">AI Confidence Score</span>
+              </div>
+              <Badge className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700 px-3 py-1 text-sm font-semibold">
+                {confidenceLevel}%
               </Badge>
             </div>
+            
+            {/* Progress Bar */}
+            <div className="w-full bg-blue-100 dark:bg-blue-900/30 rounded-full h-2">
+              <div 
+                className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-1000 ease-out"
+                style={{ width: `${confidenceLevel}%` }}
+              />
+            </div>
+            
+            <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
+              Based on deal outcome analysis and historical patterns
+            </p>
           </div>
 
-          {/* Outcome Summary */}
-          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-3 mb-3">
-              {getOutcomeIcon(analysis.analysis?.outcome || dealOutcome.split('_')[1])}
-              <div>
-                <Badge className={`border text-sm px-3 py-1 rounded-full font-medium ${getOutcomeColor(analysis.analysis?.outcome || dealOutcome.split('_')[1])}`}>
-                  Deal {(analysis.analysis?.outcome || dealOutcome.split('_')[1]).toUpperCase()}
+          {/* Enhanced Outcome Summary */}
+          <div className={`bg-gradient-to-r ${outcome === 'won' ? 'from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20' : 'from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20'} rounded-xl p-6 border ${outcome === 'won' ? 'border-green-200 dark:border-green-800' : 'border-red-200 dark:border-red-800'}`}>
+            <div className="flex items-center gap-4 mb-4">
+              <div className={`w-12 h-12 bg-gradient-to-br ${getOutcomeGradient(outcome)} rounded-xl flex items-center justify-center shadow-md`}>
+                {getOutcomeIcon(outcome)}
+              </div>
+              <div className="flex-1">
+                <Badge className={`border text-sm px-4 py-2 rounded-full font-semibold ${getOutcomeColor(outcome)}`}>
+                  Deal {outcome.toUpperCase()}
                 </Badge>
                 {analysis.analysis?.timeline && (
-                  <p className="text-caption text-slate-500 dark:text-slate-400 mt-1">
+                  <p className={`text-sm mt-2 ${outcome === 'won' ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
+                    <Calendar className="w-4 h-4 inline mr-1" />
                     Timeline: {analysis.analysis.timeline}
                   </p>
                 )}
@@ -186,18 +248,26 @@ export function WinLossExplainer({ dealId, dealOutcome, dealValue, className }: 
             </div>
           </div>
 
-          {/* Primary Factors */}
+          {/* Enhanced Primary Factors */}
           {analysis.analysis?.primaryFactors && analysis.analysis.primaryFactors.length > 0 && (
             <div>
-              <h4 className="text-label text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-4">
-                Primary Factors
-              </h4>
-              <div className="space-y-3">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Target className="w-4 h-4 text-white" />
+                </div>
+                <h4 className="text-h3 font-semibold text-slate-900 dark:text-slate-100">
+                  Primary Factors
+                </h4>
+              </div>
+              <div className="grid gap-4">
                 {analysis.analysis.primaryFactors.map((factor, index) => (
-                  <div key={index} className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-                    <div className="flex items-start gap-3">
-                      <Target className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-1 flex-shrink-0" />
-                      <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{factor}</p>
+                  <div key={index} className="group bg-white dark:bg-slate-800/50 rounded-xl p-5 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md dark:hover:shadow-slate-900/20 transition-all duration-200">
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-sm font-semibold">{index + 1}</span>
+                      </div>
+                      <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed flex-1">{factor}</p>
+                      <ArrowRight className="w-4 h-4 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0" />
                     </div>
                   </div>
                 ))}
@@ -205,15 +275,22 @@ export function WinLossExplainer({ dealId, dealOutcome, dealValue, className }: 
             </div>
           )}
 
-          {/* Objection Handling */}
+          {/* Enhanced Objection Handling */}
           {analysis.analysis?.objectionHandling && (
             <div>
-              <h4 className="text-label text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-4">
-                Objection Handling
-              </h4>
-              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <MessageCircle className="w-4 h-4 text-orange-600 dark:text-orange-400 mt-1 flex-shrink-0" />
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                  <MessageCircle className="w-4 h-4 text-white" />
+                </div>
+                <h4 className="text-h3 font-semibold text-slate-900 dark:text-slate-100">
+                  Objection Handling
+                </h4>
+              </div>
+              <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl p-6 border border-orange-200 dark:border-orange-800">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <MessageCircle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                  </div>
                   <p className="text-sm text-orange-800 dark:text-orange-300 leading-relaxed">
                     {analysis.analysis.objectionHandling}
                   </p>
@@ -222,16 +299,23 @@ export function WinLossExplainer({ dealId, dealOutcome, dealValue, className }: 
             </div>
           )}
 
-          {/* Customer Engagement */}
+          {/* Enhanced Customer Engagement */}
           {analysis.analysis?.engagementLevel && (
             <div>
-              <h4 className="text-label text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-4">
-                Customer Engagement
-              </h4>
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <TrendingUp className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-1 flex-shrink-0" />
-                  <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center">
+                  <Users className="w-4 h-4 text-white" />
+                </div>
+                <h4 className="text-h3 font-semibold text-slate-900 dark:text-slate-100">
+                  Customer Engagement
+                </h4>
+              </div>
+              <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-xl p-6 border border-teal-200 dark:border-teal-800">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Users className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                  </div>
+                  <p className="text-sm text-teal-800 dark:text-teal-300 leading-relaxed">
                     {analysis.analysis.engagementLevel}
                   </p>
                 </div>
@@ -239,17 +323,24 @@ export function WinLossExplainer({ dealId, dealOutcome, dealValue, className }: 
             </div>
           )}
 
-          {/* Key Lessons */}
+          {/* Enhanced Key Lessons */}
           {analysis.analysis?.keyLessons && analysis.analysis.keyLessons.length > 0 && (
             <div>
-              <h4 className="text-label text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-4">
-                Key Lessons
-              </h4>
-              <div className="space-y-3">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Lightbulb className="w-4 h-4 text-white" />
+                </div>
+                <h4 className="text-h3 font-semibold text-slate-900 dark:text-slate-100">
+                  Key Lessons
+                </h4>
+              </div>
+              <div className="grid gap-4">
                 {analysis.analysis.keyLessons.map((lesson, index) => (
-                  <div key={index} className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <Lightbulb className="w-4 h-4 text-purple-600 dark:text-purple-400 mt-1 flex-shrink-0" />
+                  <div key={index} className="group bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl p-5 border border-purple-200 dark:border-purple-800 hover:shadow-md transition-all duration-200">
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Lightbulb className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      </div>
                       <p className="text-sm text-purple-800 dark:text-purple-300 leading-relaxed">{lesson}</p>
                     </div>
                   </div>
@@ -258,18 +349,26 @@ export function WinLossExplainer({ dealId, dealOutcome, dealValue, className }: 
             </div>
           )}
 
-          {/* Future Recommendations */}
+          {/* Enhanced Future Recommendations */}
           {analysis.analysis?.recommendations && analysis.analysis.recommendations.length > 0 && (
             <div>
-              <h4 className="text-label text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-4">
-                Recommendations for Future Deals
-              </h4>
-              <div className="space-y-3">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-white" />
+                </div>
+                <h4 className="text-h3 font-semibold text-slate-900 dark:text-slate-100">
+                  Recommendations for Future Deals
+                </h4>
+              </div>
+              <div className="grid gap-4">
                 {analysis.analysis.recommendations.map((recommendation: string, index: number) => (
-                  <div key={index} className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <Target className="w-4 h-4 text-green-600 dark:text-green-400 mt-1 flex-shrink-0" />
-                      <p className="text-sm text-green-800 dark:text-green-300 leading-relaxed">{recommendation}</p>
+                  <div key={index} className="group bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl p-5 border border-emerald-200 dark:border-emerald-800 hover:shadow-md transition-all duration-200">
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Target className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <p className="text-sm text-emerald-800 dark:text-emerald-300 leading-relaxed flex-1">{recommendation}</p>
+                      <ArrowRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0" />
                     </div>
                   </div>
                 ))}
@@ -277,30 +376,32 @@ export function WinLossExplainer({ dealId, dealOutcome, dealValue, className }: 
             </div>
           )}
 
-          {/* RAG Context */}
+          {/* Enhanced RAG Context */}
           {analysis.ragContext && analysis.ragContext.length > 0 && (
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span className="text-label font-medium text-blue-800 dark:text-blue-300">
-                  Based on {analysis.ragContext.length} similar deals
+            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-xl p-6 border border-indigo-200 dark:border-indigo-800">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <span className="text-label font-semibold text-indigo-900 dark:text-indigo-100">
+                  Data-Driven Analysis
                 </span>
               </div>
-              <p className="text-sm text-blue-700 dark:text-blue-400">
-                AI analyzed similar deals with comparable outcomes and characteristics.
+              <p className="text-sm text-indigo-800 dark:text-indigo-300 leading-relaxed">
+                This analysis is based on <strong>{analysis.ragContext.length} similar deals</strong> with comparable characteristics and outcomes in your industry.
               </p>
             </div>
           )}
 
-          {/* Feedback */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
-            <span className="text-label text-slate-600 dark:text-slate-400">Was this analysis helpful?</span>
-            <div className="flex gap-2">
+          {/* Enhanced Feedback */}
+          <div className="flex items-center justify-between pt-6 border-t border-slate-200 dark:border-slate-700">
+            <span className="text-label font-medium text-slate-700 dark:text-slate-300">How helpful was this analysis?</span>
+            <div className="flex gap-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => handleFeedback('thumbs_up')}
-                className="text-slate-500 hover:text-green-600 dark:text-slate-400 dark:hover:text-green-400 h-8 w-8 p-0"
+                className="text-slate-500 hover:text-green-600 dark:text-slate-400 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 h-9 w-9 p-0 rounded-lg transition-all duration-200"
               >
                 <ThumbsUp className="w-4 h-4" />
               </Button>
@@ -308,7 +409,7 @@ export function WinLossExplainer({ dealId, dealOutcome, dealValue, className }: 
                 variant="ghost"
                 size="sm"
                 onClick={() => handleFeedback('thumbs_down')}
-                className="text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 h-8 w-8 p-0"
+                className="text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 h-9 w-9 p-0 rounded-lg transition-all duration-200"
               >
                 <ThumbsDown className="w-4 h-4" />
               </Button>
@@ -317,18 +418,24 @@ export function WinLossExplainer({ dealId, dealOutcome, dealValue, className }: 
         </div>
       )}
 
-      {/* Empty State */}
+      {/* Enhanced Empty State */}
       {!analysis && !loading && !error && (
-        <div className="text-center py-8">
-          <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Brain className="w-6 h-6 text-slate-400 dark:text-slate-500" />
+        <div className="text-center py-12">
+          <div className={`w-16 h-16 bg-gradient-to-br ${getOutcomeGradient(dealOutcome.split('_')[1])} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg`}>
+            {getOutcomeIcon(dealOutcome.split('_')[1])}
           </div>
-          <h4 className="text-label font-medium text-slate-800 dark:text-slate-100 mb-2">
-            No Analysis Available
+          <h4 className="text-h3 font-semibold text-slate-900 dark:text-slate-100 mb-3">
+            Ready to Analyze Deal Outcome
           </h4>
-          <p className="text-caption text-slate-600 dark:text-slate-400">
-            Click refresh to analyze deal outcome
+          <p className="text-body text-slate-600 dark:text-slate-400 mb-6 max-w-sm mx-auto">
+            Generate comprehensive insights about why this deal was {dealOutcome.split('_')[1]} and learn for future opportunities
           </p>
+          <Button
+            onClick={fetchAnalysis}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+          >
+            Generate Analysis
+          </Button>
         </div>
       )}
     </div>
