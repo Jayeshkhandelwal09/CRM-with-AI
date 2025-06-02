@@ -26,6 +26,7 @@ import {
   Zap
 } from 'lucide-react';
 import { aiService, PersonaBuilderResponse, type CustomerPersona } from '@/services/aiService';
+import { toast } from 'sonner';
 
 interface CustomerPersonaProps {
   contactId: string;
@@ -110,6 +111,19 @@ export function CustomerPersona({ contactId, contactName, company, className }: 
         feedback,
         responseId: contactId
       });
+
+      if (feedback === 'positive') {
+        toast.success('Thank you for your feedback!', {
+          description: 'Your feedback helps us create better customer personas.',
+          duration: 3000,
+        });
+      } else {
+        toast.info('Feedback received', {
+          description: 'We\'ll use your feedback to improve our persona analysis.',
+          duration: 3000,
+        });
+      }
+      
       console.log(`Feedback submitted: ${feedback}`);
     } catch (err) {
       console.error('Failed to submit feedback:', err);

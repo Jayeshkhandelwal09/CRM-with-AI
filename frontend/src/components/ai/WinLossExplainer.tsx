@@ -27,6 +27,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { aiService, WinLossExplainerResponse } from '@/services/aiService';
+import { toast } from 'sonner';
 
 interface WinLossExplainerProps {
   dealId: string;
@@ -105,6 +106,17 @@ export function WinLossExplainer({ dealId, dealOutcome, dealValue, className }: 
         feedback: feedback === 'thumbs_up' ? 'positive' : 'negative',
         responseId: dealId
       });
+      if (feedback === 'thumbs_up') {
+        toast.success('Thank you for your feedback!', {
+          description: 'Your positive feedback helps us improve our AI analysis.',
+          duration: 3000,
+        });
+      } else {
+        toast.info('Feedback received', {
+          description: 'Thank you for helping us improve. We\'ll work on making our analysis more helpful.',
+          duration: 3000,
+        });
+      }
       console.log(`Feedback submitted: ${feedback}`);
     } catch (err) {
       console.error('Failed to submit feedback:', err);

@@ -21,6 +21,7 @@ import {
   Activity
 } from 'lucide-react';
 import { aiService, DealCoachResponse, DealCoachSuggestion } from '@/services/aiService';
+import { toast } from 'sonner';
 
 interface DealCoachProps {
   dealId: string;
@@ -105,6 +106,18 @@ export function DealCoach({ dealId, dealStage, dealValue, className }: DealCoach
         feedback,
         responseId: dealId
       });
+
+      if (feedback === 'positive') {
+        toast.success('Thank you for your feedback!', {
+          description: 'Your feedback helps us provide better deal coaching.',
+          duration: 3000,
+        });
+      } else {
+        toast.info('Feedback received', {
+          description: 'We\'ll improve our coaching suggestions based on your feedback.',
+          duration: 3000,
+        });
+      }
       console.log(`Feedback submitted: ${feedback}`);
     } catch (err) {
       console.error('Failed to submit feedback:', err);

@@ -18,6 +18,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { aiService, ObjectionHandlerResponse } from '@/services/aiService';
+import { toast } from 'sonner';
 
 interface ObjectionHandlerProps {
   dealId?: string;
@@ -97,6 +98,18 @@ export function ObjectionHandler({ dealId, className }: ObjectionHandlerProps) {
         feedback,
         responseId: objectionText
       });
+
+      if (feedback === 'positive') {
+        toast.success('Thank you for your feedback!', {
+          description: 'Your feedback helps us handle objections better.',
+          duration: 3000,
+        });
+      } else {
+        toast.info('Feedback received', {
+          description: 'We\'ll improve our objection handling based on your input.',
+          duration: 3000,
+        });
+      }
       console.log(`Feedback submitted: ${feedback}`);
     } catch (err) {
       console.error('Failed to submit feedback:', err);
