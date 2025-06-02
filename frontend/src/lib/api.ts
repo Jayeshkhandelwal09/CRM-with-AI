@@ -745,37 +745,37 @@ export const getStageColor = (stage: string): string => {
 
 export const getPriorityColor = (priority: string): string => {
   const colors = {
-    low: 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600',
-    medium: 'bg-amber-200 text-amber-900 dark:bg-amber-800 dark:text-amber-100 border border-amber-300 dark:border-amber-700',
-    high: 'bg-red-200 text-red-900 dark:bg-red-800 dark:text-red-100 border border-red-300 dark:border-red-700',
-    urgent: 'bg-red-300 text-red-900 dark:bg-red-700 dark:text-red-100 border border-red-400 dark:border-red-600',
+    low: 'bg-slate-600 text-white border border-slate-700',
+    medium: 'bg-amber-600 text-white border border-amber-700',
+    high: 'bg-orange-600 text-white border border-orange-700',
+    urgent: 'bg-red-600 text-white border border-red-700',
   };
   return colors[priority as keyof typeof colors] || colors.medium;
 };
 
 export const getContactStatusColor = (status: string): string => {
   const colors = {
-    lead: 'bg-blue-200 text-blue-900 dark:bg-blue-800 dark:text-blue-100 border border-blue-300 dark:border-blue-700',
-    prospect: 'bg-purple-200 text-purple-900 dark:bg-purple-800 dark:text-purple-100 border border-purple-300 dark:border-purple-700',
-    customer: 'bg-green-200 text-green-900 dark:bg-green-800 dark:text-green-100 border border-green-300 dark:border-green-700',
-    active: 'bg-emerald-200 text-emerald-900 dark:bg-emerald-800 dark:text-emerald-100 border border-emerald-300 dark:border-emerald-700',
-    inactive: 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100 border border-gray-300 dark:border-gray-600',
+    lead: 'bg-blue-600 text-white border border-blue-700',
+    prospect: 'bg-purple-600 text-white border border-purple-700',
+    customer: 'bg-green-600 text-white border border-green-700',
+    active: 'bg-emerald-600 text-white border border-emerald-700',
+    inactive: 'bg-slate-600 text-white border border-slate-700',
   };
   return colors[status as keyof typeof colors] || colors.lead;
 };
 
 export const getLeadSourceColor = (source: string): string => {
   const colors = {
-    website: 'bg-blue-200 text-blue-900 dark:bg-blue-800 dark:text-blue-100 border border-blue-300 dark:border-blue-700',
-    referral: 'bg-green-200 text-green-900 dark:bg-green-800 dark:text-green-100 border border-green-300 dark:border-green-700',
-    social_media: 'bg-purple-200 text-purple-900 dark:bg-purple-800 dark:text-purple-100 border border-purple-300 dark:border-purple-700',
-    email: 'bg-indigo-200 text-indigo-900 dark:bg-indigo-800 dark:text-indigo-100 border border-indigo-300 dark:border-indigo-700',
-    email_campaign: 'bg-indigo-200 text-indigo-900 dark:bg-indigo-800 dark:text-indigo-100 border border-indigo-300 dark:border-indigo-700',
-    phone: 'bg-orange-200 text-orange-900 dark:bg-orange-800 dark:text-orange-100 border border-orange-300 dark:border-orange-700',
-    cold_call: 'bg-orange-200 text-orange-900 dark:bg-orange-800 dark:text-orange-100 border border-orange-300 dark:border-orange-700',
-    event: 'bg-pink-200 text-pink-900 dark:bg-pink-800 dark:text-pink-100 border border-pink-300 dark:border-pink-700',
-    advertisement: 'bg-red-200 text-red-900 dark:bg-red-800 dark:text-red-100 border border-red-300 dark:border-red-700',
-    other: 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100 border border-gray-300 dark:border-gray-600',
+    website: 'bg-blue-600 text-white border border-blue-700',
+    referral: 'bg-green-600 text-white border border-green-700',
+    social_media: 'bg-purple-600 text-white border border-purple-700',
+    email: 'bg-indigo-600 text-white border border-indigo-700',
+    email_campaign: 'bg-indigo-600 text-white border border-indigo-700',
+    phone: 'bg-orange-600 text-white border border-orange-700',
+    cold_call: 'bg-orange-600 text-white border border-orange-700',
+    event: 'bg-pink-600 text-white border border-pink-700',
+    advertisement: 'bg-red-600 text-white border border-red-700',
+    other: 'bg-slate-600 text-white border border-slate-700',
   };
   return colors[source as keyof typeof colors] || colors.other;
 }; 
