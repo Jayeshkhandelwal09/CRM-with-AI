@@ -11,7 +11,7 @@ const corsOptions = {
       'http://localhost:3000',
       'http://localhost:3001',
       'http://127.0.0.1:3000',
-      'https://crmai-kappa.vercel.app',
+      'https://crmai-kappa.vercel.app/api',
     ];
 
     if (allowedOrigins.includes(origin)) {
