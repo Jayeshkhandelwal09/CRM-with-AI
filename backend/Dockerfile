@@ -1,7 +1,7 @@
 FROM node:18-alpine
 
 # Install Python and build dependencies for ChromaDB
-RUN apk add --no-cache python3 py3-pip build-base
+RUN apk add --no-cache python3 py3-pip py3-venv build-base
 
 # Set working directory
 WORKDIR /app
@@ -12,8 +12,11 @@ COPY package*.json ./
 # Install Node.js dependencies
 RUN npm ci --only=production
 
-# Install ChromaDB
-RUN pip3 install chromadb
+# Create Python virtual environment and install ChromaDB
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --upgrade pip
+RUN pip install chromadb
 
 # Copy application code
 COPY . .
@@ -24,8 +27,9 @@ RUN mkdir -p uploads logs chroma-data
 # Expose ports (3000 for backend, 8000 for ChromaDB)
 EXPOSE 3000 8000
 
-# Create startup script
+# Create startup script that activates venv
 RUN echo '#!/bin/sh' > start.sh && \
+    echo 'export PATH="/opt/venv/bin:$PATH"' >> start.sh && \
     echo 'echo "Starting ChromaDB..."' >> start.sh && \
     echo 'chroma run --host 0.0.0.0 --port 8000 --path /app/chroma-data &' >> start.sh && \
     echo 'echo "Waiting for ChromaDB to start..."' >> start.sh && \
@@ -34,5 +38,8 @@ RUN echo '#!/bin/sh' > start.sh && \
     echo 'npm start' >> start.sh && \
     chmod +x start.sh
 
+# Set PATH for runtime
+ENV PATH="/opt/venv/bin:$PATH"
+
 # Start both services
-CMD ["./start.sh"] 
+CMD ["./start.sh"]
