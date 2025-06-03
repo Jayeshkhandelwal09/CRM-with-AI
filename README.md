@@ -20,6 +20,7 @@
 ## 📋 Table of Contents
 
 - [🎯 Core AI Features](#-core-ai-features)
+- [🎯 ScreenShots](#-screenshots)
 - [🏗️ System Architecture](#-system-architecture)
 - [🤖 AI & RAG Implementation](#-ai--rag-implementation)
 - [🗄️ Vector Database Integration](#️-vector-database-integration)
@@ -105,6 +106,25 @@ Provides comprehensive analysis of closed deals to improve future performance:
 - **Competitive Factors**: Identifies competitive advantages/disadvantages
 
 ---
+
+## 🎯 ScreenShots
+<img width="1466" alt="Screenshot 2025-06-03 at 9 07 09 AM" src="https://github.com/user-attachments/assets/fcbef977-743c-4f02-87ad-30e0421a670d" />
+<img width="1465" alt="Screenshot 2025-06-03 at 9 07 21 AM" src="https://github.com/user-attachments/assets/3571f6d8-ba20-4ffe-81bd-84fe48f0a1d1" />
+<img width="1470" alt="Screenshot 2025-06-03 at 9 07 34 AM" src="https://github.com/user-attachments/assets/1b9348ce-0f66-4883-b9f9-293e5d4b08d0" />
+<img width="1470" alt="Screenshot 2025-06-03 at 9 07 52 AM" src="https://github.com/user-attachments/assets/216d4d9b-14b8-49e2-9600-d8d100e02e33" />
+<img width="1470" alt="Screenshot 2025-06-03 at 9 08 03 AM" src="https://github.com/user-attachments/assets/30395940-dd80-4bf6-abbb-392492265edf" />
+<img width="1469" alt="Screenshot 2025-06-03 at 9 08 14 AM" src="https://github.com/user-attachments/assets/56e9619b-7f95-42b7-96fe-cde35c6405c8" />
+<img width="1468" alt="Screenshot 2025-06-03 at 9 09 13 AM" src="https://github.com/user-attachments/assets/a61b4c43-5f60-46e6-8044-289327662235" />
+<img width="1470" alt="Screenshot 2025-06-03 at 9 09 25 AM" src="https://github.com/user-attachments/assets/5949b96f-bf37-4fbc-b23f-ff528199425e" />
+<img width="1467" alt="Screenshot 2025-06-03 at 9 09 35 AM" src="https://github.com/user-attachments/assets/13f54c7f-f687-46cd-bc29-cb0a8ecbbf2b" />
+<img width="1462" alt="Screenshot 2025-06-03 at 9 09 47 AM" src="https://github.com/user-attachments/assets/d950cfef-c3fe-413c-a527-712516766cb5" />
+<img width="1469" alt="Screenshot 2025-06-03 at 9 10 11 AM" src="https://github.com/user-attachments/assets/f54a0fc6-0905-48c3-a34c-81e5efb72c2f" />
+<img width="1465" alt="Screenshot 2025-06-03 at 9 10 33 AM" src="https://github.com/user-attachments/assets/8805a684-962b-428f-94dd-ae4c55c048ec" />
+<img width="1468" alt="Screenshot 2025-06-03 at 9 10 48 AM" src="https://github.com/user-attachments/assets/16fcd56b-82f0-4e4e-b40e-3ffdb18eec8e" />
+<img width="1470" alt="Screenshot 2025-06-03 at 9 10 55 AM" src="https://github.com/user-attachments/assets/9238b21b-7411-4249-9d2f-7df3157cfd8c" />
+<img width="1470" alt="Screenshot 2025-06-03 at 9 11 15 AM" src="https://github.com/user-attachments/assets/0e947c20-2da3-40d2-ae13-20b08b821de8" />
+
+
 
 ## 🏗️ System Architecture
 
