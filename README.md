@@ -108,6 +108,8 @@ Provides comprehensive analysis of closed deals to improve future performance:
 
 ## 🏗️ System Architecture
 
+**Mermaid System Arch link : https://spiffy-dodol-911dbe.netlify.app/** 
+
 ```mermaid
 graph TB
     subgraph "Frontend Layer"
