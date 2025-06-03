@@ -529,12 +529,58 @@ chroma run --host localhost --port 8000
 5. **Environment Variables**
 ```bash
 # Backend .env
-OPENAI_API_KEY=your_openai_api_key
-MONGODB_URI=mongodb://localhost:27017/crm_ai
-CHROMA_URL=http://localhost:8000
-JWT_SECRET=your_jwt_secret
+# =============================================================================
+# CRM AI Backend Environment Configuration
+# =============================================================================
+
+# Server Configuration
+PORT=5000
 NODE_ENV=development
+
+# Database Configuration
+MONGODB_URI=mongodb://localhost:27017/crm-ai-dev
+MONGODB_TEST_URI=mongodb://localhost:27017/crm-ai-test
+
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-change-in-production-min-32-chars
+JWT_REFRESH_SECRET=your-super-secret-refresh-key-change-in-production-min-32-chars
+JWT_EXPIRE=24h
+JWT_REFRESH_EXPIRE=7d
+
+# CORS Configuration
+FRONTEND_URL=http://localhost:3000
+
+# Rate Limiting Configuration
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# AI Configuration
+OPENAI_API_KEY=your-openai-api-key-here
 AI_REQUESTS_PER_DAY=500
+
+# File Upload Configuration
+MAX_FILE_SIZE=5242880
+UPLOAD_PATH=uploads/
+
+# Email Configuration (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+
+# Logging Configuration
+LOG_LEVEL=info
+LOG_FILE=logs/combined.log
+ERROR_LOG_FILE=logs/error.log
+
+# =============================================================================
+# Development Notes:
+# =============================================================================
+# 1. Replace JWT secrets with strong random strings (min 32 characters)
+# 2. Add your OpenAI API key for AI features to work
+# 3. Configure SMTP settings for email functionality
+# 4. For production, use environment-specific values
+# =============================================================================
 
 # Frontend .env.local
 NEXT_PUBLIC_API_URL=http://localhost:3001
@@ -559,6 +605,7 @@ npm run dev
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:3001
 - ChromaDB: http://localhost:8000
+
 
 ### 📊 Initial Data Setup
 
@@ -872,13 +919,6 @@ Please use the [GitHub Issues](https://github.com/your-org/ai-powered-crm/issues
 - Environment details (OS, Node version, etc.)
 - Screenshots or logs if applicable
 
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
 
 ## 🙏 Acknowledgments
 
@@ -889,15 +929,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **ShadCN** for the beautiful UI components
 - **Vercel** for deployment and hosting solutions
 
----
-
-## 📞 Support
-
-- **Documentation**: [Full Documentation](./docs/README.md)
-- **Issues**: [GitHub Issues](https://github.com/your-org/ai-powered-crm/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/ai-powered-crm/discussions)
-- **Email**: support@your-crm-domain.com
-
+\
 ---
 
 <div align="center">
