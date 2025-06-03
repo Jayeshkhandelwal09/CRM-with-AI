@@ -5,6 +5,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { toast } from "sonner";
 import { Bars3Icon, SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 import { GlobalSearch } from '@/components/dashboard/GlobalSearch';
+import { useState, useRef, useEffect } from 'react';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -14,6 +15,8 @@ interface HeaderProps {
 export function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = () => {
     toast.info('Signing out...', {
@@ -26,6 +29,20 @@ export function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
     if (!firstName && !lastName) return 'U';
     return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 flex items-center px-4 lg:px-6">
@@ -88,13 +105,20 @@ export function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
           </div>
           
           {/* Avatar */}
-          <div className="relative group">
-            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium text-sm cursor-pointer">
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium text-sm cursor-pointer hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
               {getInitials(user?.firstName, user?.lastName)}
-            </div>
+            </button>
             
             {/* Dropdown Menu */}
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+            <div className={`absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl transition-all duration-200 z-[60] ${
+              isDropdownOpen 
+                ? 'opacity-100 visible transform translate-y-0' 
+                : 'opacity-0 invisible transform -translate-y-2'
+            }`}>
               <div className="p-3 border-b border-slate-200 dark:border-slate-700">
                 <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
                   {user?.firstName} {user?.lastName}
@@ -118,4 +142,4 @@ export function Header({ onMenuClick, sidebarCollapsed }: HeaderProps) {
       </div>
     </header>
   );
-} 
+}
